@@ -7,7 +7,7 @@ import { useContext } from 'react';
 
 export default function Page() {
     const router = useRouter()
-    const {setUser} = useContext(UserContext)
+    const {user, setUser} = useContext(UserContext)
 
     const handleForm = (e) => {
         e.preventDefault();
@@ -17,7 +17,7 @@ export default function Page() {
         const formJson = Object.fromEntries(formData.entries())
             
         setUser(formJson.user)
-        
+        console.log(user)
         router.push(`/${formJson.room}`)
     }
 
