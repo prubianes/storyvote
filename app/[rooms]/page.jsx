@@ -1,15 +1,18 @@
 'use client'
 
-import {UserContext} from '@/components/UserContext/userContextProvider'
-import Header from '@/components/header/header';
-import { useContext } from 'react'
+import Keypad from '@/components/keypad/keypad'
+import Aside from '@/components/aside/Aside'
 
 export default function Page() {
-    const {user} =  useContext(UserContext);
+    
     return (
-        <main class="container">
-            <div class="grid">
-                <h3>Historia: Agregar xxxxxxx a YYYYYYYYY</h3>
+        <main className="container">
+            <div className="grid">
+                <section>
+                    <h3>Historia: Agregar xxxxxxx a YYYYYYYYY</h3>
+                    <Keypad />
+                </section>
+                <Aside />
             </div>
         </main>
     )
