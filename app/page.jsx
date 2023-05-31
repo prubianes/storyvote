@@ -2,12 +2,29 @@
 'use client'
 
 import { UserContext } from '@/components/UserContext/userContextProvider';
+import { db } from '@/system/firebase';
+import { set, ref, get, child} from 'firebase/database'
 import { useRouter } from 'next/navigation';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 export default function Page() {
     const router = useRouter()
     const {user, setUser} = useContext(UserContext)
+    const [rooms, setRooms] = useState([])
+
+    useEffect(() => {
+        get(child(ref(db), `rooms`)).then((snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val()
+                console.log(Object.keys(data))
+                setRooms(Object.keys(data))
+            } else {
+              console.log("No data available");
+            }
+        }).catch((error) => {
+        console.error(error);
+        });
+    }, [])
 
     const handleForm = (e) => {
         e.preventDefault();
@@ -31,7 +48,11 @@ export default function Page() {
 
                     <select id="room" name="room" defaultValue={''}required>
                         <option value='' >Seleccionar una sala</option>
-                        <option value='RegCert'>RegCert</option>
+                        {
+                            rooms.map((room) => {
+                                return <option value={room} >{room}</option>
+                            })
+                        }
                     </select>
                     <button type='submit'>Entrar</button>
                 </form>
