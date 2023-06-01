@@ -1,9 +1,16 @@
-import { useState } from 'react'
+import { db } from '@/system/firebase'
+import { ref, update } from 'firebase/database'
+import { useEffect, useState } from 'react'
 
-export default function Keypad() {
+export default function Keypad( {votes, room} ) {
     const values = [1,2,3,5,8,13,20,'X']
-    const [votes, setVotes] = useState([0,0,0,0,0,0,0,0])
     const [userVote, setUserVote] = useState([false, 0])
+    const [maxVotes, setMaxVotes] = useState(1)
+
+    useEffect(() => {
+        const max = votes.reduce((partial, a) => partial+a, 0)
+        setMaxVotes(max)
+    }, [votes])
     
     const handleVote = (vote) => {
         let indexValue = values.indexOf(vote)
@@ -16,7 +23,8 @@ export default function Keypad() {
                 }
             })
             const button = document.getElementById(vote).classList.add('contrast')
-            updateStates(newVotes, vote, true)
+            updateState(vote, true)
+            writeVotesDB(newVotes)
         } else {
             if(vote === userVote[1]){
                 const newVotes = votes.map((total, index) => {
@@ -27,25 +35,32 @@ export default function Keypad() {
                     }
                 })
                 const button = document.getElementById(vote).classList.remove('contrast')
-                updateStates(newVotes, 0, false)
+                updateState(0, false)
+                writeVotesDB(newVotes)
             }
         }
     }
     
     const buttonList = values.map(value => (
-        <button id={value} onClick={() => handleVote(value)}>{value}</button>
+        <button key={value} id={value} onClick={() => handleVote(value)}>{value}</button>
     ))
     const progressList = values.map((value, index) => (
-        <>
+        <div key={'key'+value}>
             {value}
-            <progress value={votes[index]} max={4} />
-        </>
+            <progress value={votes[index]} max={maxVotes} />
+        </div>
         )
     )
     
-    const updateStates = (newVotes, vote, haveVote) => {
-        setVotes(newVotes)
+    const updateState = (vote, haveVote) => {
         setUserVote([haveVote, vote])
+    }
+
+    const writeVotesDB = (newVotes) => {
+        update(ref(db, 'rooms/' + room ), {
+            votes: newVotes
+        })
+
     }
     
     return (
