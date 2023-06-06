@@ -1,14 +1,11 @@
-export default function Aside() {
+export default function Aside({ users }) {
 
     return (
         <aside>
             <article>
                 <h6>Usuarios Conectados</h6>
                 <ul>
-                    <li>Story 1: 5</li>
-                    <li>Story 2: 13</li>
-                    <li>Story 3: 5</li>
-                    <li>Story 4: 20</li>
+                    {users ? users.map((user) => {return <li>{user}</li>}) : ''}
                 </ul>
             </article>
         </aside>

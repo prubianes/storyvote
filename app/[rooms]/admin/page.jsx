@@ -1,5 +1,6 @@
 'use client'
 import { db } from '@/system/firebase';
+import { initialVoteState } from '@/system/stateUtils';
 import { ref, update } from 'firebase/database';
 
 
@@ -17,7 +18,7 @@ export default function Page({params}) {
 
     const handleReset = () => {
         update(ref(db, 'rooms/' + params.rooms ), {
-            votes: [0,0,0,0,0,0,0,0]
+            votes: initialVoteState
         })  
     }
     return (

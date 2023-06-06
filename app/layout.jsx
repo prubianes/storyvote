@@ -1,7 +1,7 @@
 import './pico.min.css'
 import './globals.css'
 import Header from '@/components/header/header'
-import UserContextProvider from '@/components/UserContext/userContextProvider'
+import UserContextProvider from '@/components/RoomContext/roomContextProvider'
 
 export const metadata = {
     title: 'StoryVote',

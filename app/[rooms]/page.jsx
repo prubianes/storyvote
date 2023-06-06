@@ -2,14 +2,16 @@
 
 import Keypad from '@/components/keypad/keypad'
 import Aside from '@/components/aside/Aside'
-import { useEffect, useState } from 'react'
-import { onValue, ref, set } from 'firebase/database'
 import { db } from '@/system/firebase'
+import { initialVoteState } from '@/system/stateUtils'
+import { useEffect, useState } from 'react'
+import { onValue, ref } from 'firebase/database'
 
 export default function Page({params}) {
 
-    const [votes, setVotes] = useState([0,0,0,0,0,0,0,0])
+    const [votes, setVotes] = useState(initialVoteState)
     const [story, setStory] = useState('')
+    const [users, setUsers] = useState([])
 
     useEffect(() => {
         const query = ref(db, 'rooms/'+params.rooms)
@@ -18,6 +20,7 @@ export default function Page({params}) {
             if(snapshot.exists()){
                setVotes(data.votes)
                setStory(data.story)
+               setUsers(data.users)
             }
         })
     }, [])
@@ -28,6 +31,7 @@ export default function Page({params}) {
                     <h3>Historia: {story}</h3>
                     <Keypad votes={votes} room={params.rooms}/>
                 </section>
+                    <Aside users={users}/>
             </div>
         </main>
     )
