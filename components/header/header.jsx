@@ -26,8 +26,10 @@ export default function Header() {
     const UsuarioLogueado = () => {
         return (
             <>
+            <span className='username'>
                 <h5>Hola {user}</h5>
                 <a onClick={resetAll}>Logout</a>
+            </span>
             </>
         )
     }
@@ -41,8 +43,8 @@ export default function Header() {
                     height={60}
                     alt="Storyvote Logo"
                 />{room ? ' StoryVote @ ' + room : ''}</h1>
-            </div>
             {user ? <UsuarioLogueado /> : ''}
+            </div>
         </header>
     )
 }
