@@ -10,6 +10,12 @@ export default function Keypad( {votes, room} ) {
     useEffect(() => {
         const max = votes.reduce((partial, a) => partial+a, 0)
         setMaxVotes(max)
+        if(max === 0){
+            if(userVote[1] !== 0){
+                const button = document.getElementById(userVote[1]).classList.remove('contrast')
+                updateVoteState(0, false);
+            }
+        }
     }, [votes])
     
     const handleVote = (vote) => {
@@ -23,7 +29,7 @@ export default function Keypad( {votes, room} ) {
                 }
             })
             const button = document.getElementById(vote).classList.add('contrast')
-            updateState(vote, true)
+            updateVoteState(vote, true)
             writeVotesDB(newVotes)
         } else {
             if(vote === userVote[1]){
@@ -35,7 +41,7 @@ export default function Keypad( {votes, room} ) {
                     }
                 })
                 const button = document.getElementById(vote).classList.remove('contrast')
-                updateState(0, false)
+                updateVoteState(0, false)
                 writeVotesDB(newVotes)
             }
         }
@@ -44,6 +50,7 @@ export default function Keypad( {votes, room} ) {
     const buttonList = values.map(value => (
         <button key={value} id={value} onClick={() => handleVote(value)}>{value}</button>
     ))
+
     const progressList = values.map((value, index) => (
         <div key={'key'+value}>
             {value}
@@ -52,7 +59,7 @@ export default function Keypad( {votes, room} ) {
         )
     )
     
-    const updateState = (vote, haveVote) => {
+    const updateVoteState = (vote, haveVote) => {
         setUserVote([haveVote, vote])
     }
 
@@ -60,7 +67,6 @@ export default function Keypad( {votes, room} ) {
         update(ref(db, 'rooms/' + room ), {
             votes: newVotes
         })
-
     }
     
     return (
