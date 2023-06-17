@@ -1,7 +1,7 @@
 'use client'
 
 import Keypad from '@/components/keypad/keypad'
-import Aside from '@/components/aside/Aside'
+import Aside from '@/components/aside/aside'
 import { db } from '@/system/firebase'
 import { initialVoteState } from '@/system/stateUtils'
 import { useEffect, useState } from 'react'
