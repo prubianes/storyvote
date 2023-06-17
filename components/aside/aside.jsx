@@ -5,7 +5,7 @@ export default function Aside({ users }) {
             <article>
                 <h6>Usuarios Conectados</h6>
                 <ul>
-                    {users ? users.map((user) => {return <li>{user}</li>}) : ''}
+                    {users ? users.map((user) => {return <li key={user}>{user}</li>}) : ''}
                 </ul>
             </article>
         </aside>
