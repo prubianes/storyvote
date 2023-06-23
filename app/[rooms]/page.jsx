@@ -31,7 +31,7 @@ export default function Page({params}) {
                     <h3>Historia: {story}</h3>
                     <Keypad votes={votes} room={params.rooms}/>
                 </section>
-                    <Aside users={users}/>
+                    <Aside users={users} votes={votes}/>
             </div>
         </main>
     )

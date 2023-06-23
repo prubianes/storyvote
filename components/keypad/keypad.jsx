@@ -3,7 +3,7 @@ import { ref, update } from 'firebase/database'
 import { useEffect, useState } from 'react'
 
 export default function Keypad( {votes, room} ) {
-    const values = [1,2,3,5,8,13,20,'X']
+    const values = [1,2,3,5,8,13,20,'∞']
     const [userVote, setUserVote] = useState([false, 0])
     const [maxVotes, setMaxVotes] = useState(1)
 
