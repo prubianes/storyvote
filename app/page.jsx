@@ -31,6 +31,7 @@ export default function Page() {
         <>
             <main className="container">
                 <h1>Bienvenidos a StoryVote</h1>
+                <br />
                 <form onSubmit={handleForm}>
                     <input type="text" id="user" name="user" placeholder="Nombre" required />
                     <select id="room" name="room" defaultValue={''}required>
