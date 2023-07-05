@@ -10,6 +10,12 @@ export default function Header() {
     const { user, setUser, room, setRoom } = useContext(RoomContext)
     const router = useRouter()
 
+    if (typeof window !== 'undefined') {
+        if(localStorage.getItem('user') != null){
+            setUser(localStorage.getItem('user'))
+        }
+    }
+
     const resetAll = async () => {
         let loggedUsers = await getAllUsersFromRoom(room)
         let newUsers = loggedUsers.filter((logged) => {
@@ -17,6 +23,10 @@ export default function Header() {
         })
         console.log('updated ' + newUsers)
         updateUsers(newUsers, room)
+
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('user')
+        }
 
         setUser('')
         setRoom('')
