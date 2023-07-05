@@ -24,6 +24,10 @@ export default function Page() {
         loggedUsers.push(formJson.user);
         updateUsers(loggedUsers, formJson.room)
 
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('user', formJson.user)
+        }
+
         router.push(`/${formJson.room}`)
     }
 
