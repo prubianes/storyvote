@@ -1,4 +1,9 @@
-export default function Aside({ users, votes }) {
+interface AsideProps {
+  users: string[]
+  votes: number[]
+}
+
+export default function Aside({ users, votes }: AsideProps) {
   const numberOfVotes = votes.reduce((partial, value) => partial + value, 0)
 
   return (

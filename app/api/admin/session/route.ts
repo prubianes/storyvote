@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 import {
   adminCookieOptions,
@@ -9,7 +9,12 @@ import {
 } from '@/system/adminSession'
 import { getSupabaseServer } from '@/system/supabaseServer'
 
-export async function GET(request) {
+interface SessionBody {
+  room?: string
+  passcode?: string
+}
+
+export async function GET(request: NextRequest) {
   const room = request.nextUrl.searchParams.get('room')
   if (!room) {
     return NextResponse.json({ error: 'Missing room parameter.' }, { status: 400 })
@@ -21,8 +26,8 @@ export async function GET(request) {
   return NextResponse.json({ authorized })
 }
 
-export async function POST(request) {
-  const body = await request.json().catch(() => null)
+export async function POST(request: NextRequest) {
+  const body = (await request.json().catch(() => null)) as SessionBody | null
   const room = body?.room
   const passcode = String(body?.passcode ?? '')
 
@@ -30,8 +35,8 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Missing room.' }, { status: 400 })
   }
 
-  const supabase = getSupabaseServer()
-  const { data, error } = await supabase
+  const db: any = getSupabaseServer()
+  const { data, error } = await db
     .from('rooms')
     .select('admin_passcode_hash')
     .eq('slug', room)
@@ -58,7 +63,7 @@ export async function POST(request) {
   return response
 }
 
-export async function DELETE(request) {
+export async function DELETE(request: NextRequest) {
   const room = request.nextUrl.searchParams.get('room')
   if (!room) {
     return NextResponse.json({ error: 'Missing room parameter.' }, { status: 400 })

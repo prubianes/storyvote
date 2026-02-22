@@ -2,25 +2,38 @@
 
 import Keypad from '@/components/keypad/keypad'
 import Aside from '@/components/aside/aside'
-import { ensureRoom, getRoom, initialVoteState, subscribeToRoom, unsubscribeFromRoom } from '@/system/supabase'
+import RoundHistory from '@/components/history/roundHistory'
+import {
+  ensureRoom,
+  getRoomHistory,
+  getRoomState,
+  initialVoteState,
+  subscribeToRoom,
+  unsubscribeFromRoom,
+  type HistoryRound,
+  type RoomState,
+} from '@/system/supabase'
 import { useParams, usePathname, useRouter } from 'next/navigation'
 import { useContext, useEffect, useState } from 'react'
 import { RoomContext } from '@/components/RoomContext/roomContextProvider'
 
 export default function Page() {
-  const [votes, setVotes] = useState(initialVoteState)
+  const [votes, setVotes] = useState<number[]>(initialVoteState)
   const [story, setStory] = useState('')
-  const [users, setUsers] = useState([])
+  const [users, setUsers] = useState<string[]>([])
+  const [roundActive, setRoundActive] = useState(true)
+  const [history, setHistory] = useState<HistoryRound[]>([])
   const { setRoom } = useContext(RoomContext)
-  const params = useParams()
+  const params = useParams<{ rooms: string | string[] }>()
   const roomSlug = Array.isArray(params.rooms) ? params.rooms[0] : params.rooms
   const router = useRouter()
   const pathname = usePathname()
 
-  const syncRoomSnapshot = (data) => {
+  const syncRoomSnapshot = (data: RoomState) => {
     setVotes(data.votes ?? initialVoteState)
     setStory(data.story ?? '')
     setUsers(data.users ?? [])
+    setRoundActive(Boolean(data.round_active))
   }
 
   useEffect(() => {
@@ -36,36 +49,45 @@ export default function Page() {
     }
 
     let mounted = true
-    let channel
-    let pollId
+    let channel: ReturnType<typeof subscribeToRoom> | undefined
+    let pollId: ReturnType<typeof setInterval> | undefined
 
     async function loadRoom() {
       await ensureRoom(roomSlug)
-      const data = await getRoom(roomSlug)
+      const [data, roundHistory] = await Promise.all([getRoomState(roomSlug), getRoomHistory(roomSlug)])
 
       if (mounted) {
         syncRoomSnapshot(data)
+        setHistory(roundHistory)
       }
 
-      channel = subscribeToRoom(roomSlug, (latest) => {
+      channel = subscribeToRoom(roomSlug, async () => {
+        const [latest, latestHistory] = await Promise.all([
+          getRoomState(roomSlug),
+          getRoomHistory(roomSlug),
+        ])
         syncRoomSnapshot(latest)
+        setHistory(latestHistory)
       })
 
-      // Fallback while realtime is unavailable/misconfigured on Supabase.
       pollId = setInterval(async () => {
         if (!mounted) {
           return
         }
         try {
-          const latest = await getRoom(roomSlug)
+          const [latest, latestHistory] = await Promise.all([
+            getRoomState(roomSlug),
+            getRoomHistory(roomSlug),
+          ])
           syncRoomSnapshot(latest)
+          setHistory(latestHistory)
         } catch {
           // Ignore transient fetch errors and keep polling.
         }
       }, 2000)
     }
 
-    loadRoom()
+    void loadRoom()
 
     return () => {
       mounted = false
@@ -96,10 +118,19 @@ export default function Page() {
             </button>
           </div>
 
-          <Keypad votes={votes} room={roomSlug ?? ''} onVotesChange={setVotes} />
+          <Keypad
+            votes={votes}
+            room={roomSlug ?? ''}
+            roundActive={roundActive}
+            onVotesChange={setVotes}
+          />
         </section>
 
         <Aside users={users} votes={votes} />
+      </div>
+
+      <div className="mt-6">
+        <RoundHistory rounds={history} />
       </div>
     </main>
   )

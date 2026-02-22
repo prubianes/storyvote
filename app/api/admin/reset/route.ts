@@ -1,11 +1,14 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 import { getAdminCookieName, verifyAdminSessionToken } from '@/system/adminSession'
-import { initialVoteState } from '@/system/supabase'
 import { getSupabaseServer } from '@/system/supabaseServer'
 
-export async function POST(request) {
-  const body = await request.json().catch(() => null)
+interface ResetBody {
+  room?: string
+}
+
+export async function POST(request: NextRequest) {
+  const body = (await request.json().catch(() => null)) as ResetBody | null
   const room = body?.room
 
   if (!room) {
@@ -17,8 +20,11 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 })
   }
 
-  const supabase = getSupabaseServer()
-  const { error } = await supabase.from('rooms').update({ votes: initialVoteState }).eq('slug', room)
+  const db: any = getSupabaseServer()
+  const { error } = await db.rpc('start_new_round', {
+    p_room_slug: room,
+    p_story: null,
+  })
 
   if (error) {
     return NextResponse.json({ error: 'Failed to reset votes.' }, { status: 500 })

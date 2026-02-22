@@ -1,14 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
+import { useEffect, useState, type FormEvent } from 'react'
 
 export default function Page() {
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [isCheckingSession, setIsCheckingSession] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [authError, setAuthError] = useState('')
-  const params = useParams()
+  const params = useParams<{ rooms: string | string[] }>()
   const roomSlug = Array.isArray(params.rooms) ? params.rooms[0] : params.rooms
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function Page() {
     async function restoreAdminSession() {
       try {
         const response = await fetch(`/api/admin/session?room=${encodeURIComponent(roomSlug)}`)
-        const payload = await response.json()
+        const payload = (await response.json()) as { authorized?: boolean }
         setIsAuthorized(Boolean(payload.authorized))
       } catch {
         setIsAuthorized(false)
@@ -28,10 +28,10 @@ export default function Page() {
       }
     }
 
-    restoreAdminSession()
+    void restoreAdminSession()
   }, [roomSlug])
 
-  const handleAuth = async (e) => {
+  const handleAuth = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setAuthError('')
 
@@ -51,7 +51,9 @@ export default function Page() {
       })
 
       if (!response.ok) {
-        const payload = await response.json().catch(() => ({ error: 'Passcode inválido.' }))
+        const payload = (await response.json().catch(() => ({ error: 'Passcode inválido.' }))) as {
+          error?: string
+        }
         setAuthError(payload.error ?? 'Passcode inválido.')
         return
       }
@@ -64,7 +66,7 @@ export default function Page() {
     }
   }
 
-  const handleStoryForm = async (e) => {
+  const handleStoryForm = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!roomSlug) {
       return
@@ -122,6 +124,54 @@ export default function Page() {
     }
   }
 
+  const handleEndRound = async () => {
+    if (!roomSlug) {
+      return
+    }
+    setIsSubmitting(true)
+    setAuthError('')
+    try {
+      const response = await fetch('/api/admin/round/end', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ room: roomSlug }),
+      })
+
+      if (response.status === 401) {
+        setIsAuthorized(false)
+        setAuthError('La sesión de admin expiró. Ingresa nuevamente.')
+      } else if (!response.ok) {
+        setAuthError('No fue posible cerrar la ronda.')
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleStartRound = async () => {
+    if (!roomSlug) {
+      return
+    }
+    setIsSubmitting(true)
+    setAuthError('')
+    try {
+      const response = await fetch('/api/admin/round/start', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ room: roomSlug }),
+      })
+
+      if (response.status === 401) {
+        setIsAuthorized(false)
+        setAuthError('La sesión de admin expiró. Ingresa nuevamente.')
+      } else if (!response.ok) {
+        setAuthError('No fue posible iniciar una nueva ronda.')
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   if (isCheckingSession) {
     return (
       <main className="mx-auto w-full max-w-md px-4 pb-12 sm:px-6">
@@ -146,7 +196,6 @@ export default function Page() {
               id="passcode"
               name="passcode"
               placeholder="Passcode"
-              required={false}
               className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
             />
             {authError ? <p className="text-sm text-rose-300">{authError}</p> : null}
@@ -189,14 +238,32 @@ export default function Page() {
           </button>
         </form>
 
-        <button
-          type="button"
-          onClick={handleReset}
-          disabled={isSubmitting}
-          className="mt-6 rounded-xl border border-rose-500/50 px-4 py-2 font-semibold text-rose-300 transition hover:border-rose-400 hover:text-rose-200"
-        >
-          Reset votacion
-        </button>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={handleEndRound}
+            disabled={isSubmitting}
+            className="rounded-xl border border-amber-500/50 px-4 py-2 font-semibold text-amber-300 transition hover:border-amber-400 hover:text-amber-200"
+          >
+            Cerrar ronda
+          </button>
+          <button
+            type="button"
+            onClick={handleStartRound}
+            disabled={isSubmitting}
+            className="rounded-xl border border-cyan-500/50 px-4 py-2 font-semibold text-cyan-300 transition hover:border-cyan-400 hover:text-cyan-200"
+          >
+            Iniciar nueva ronda
+          </button>
+          <button
+            type="button"
+            onClick={handleReset}
+            disabled={isSubmitting}
+            className="rounded-xl border border-rose-500/50 px-4 py-2 font-semibold text-rose-300 transition hover:border-rose-400 hover:text-rose-200"
+          >
+            Reset votacion
+          </button>
+        </div>
       </section>
     </main>
   )

@@ -28,7 +28,8 @@ Reboot StoryVote with a modern Next.js stack, migrate backend from Firebase to S
 ### Phase 2: Data Layer Migration (Firebase -> Supabase)
 - [-] Implement Supabase schema for rooms/participants/rounds/votes.
   - [x] Rooms schema + migrations `001`, `002`, `003`.
-  - [ ] Participants/rounds/votes normalized schema.
+  - [-] Rounds/votes normalized schema started in migration `004`.
+  - [ ] Participant model still pending.
 - [x] Add centralized data-access module for room operations.
 - [x] Replace Firebase calls in pages/components with Supabase operations.
 - [-] Add realtime subscriptions for room updates.
@@ -68,7 +69,8 @@ Reboot StoryVote with a modern Next.js stack, migrate backend from Firebase to S
   - `/{roomSlug}/admin` room administration
 - [-] Shared domain models:
   - [x] Room-level model and vote array flow
-  - [ ] `Round`, `Participant`, normalized `Vote` model
+  - [-] `Round` + normalized `Vote` flow is implemented (current room state + cast RPC)
+  - [ ] `Participant` model pending
 - [-] Data APIs:
   - [x] Room create/get
   - [x] Story update/reset round (server-side admin APIs)
@@ -99,6 +101,6 @@ Reboot StoryVote with a modern Next.js stack, migrate backend from Firebase to S
   - Mitigation applied: server-side admin mutations with service role; client no longer mutates admin fields.
 
 ## Next Recommended Slice
-1. [ ] Implement normalized `rounds` + `votes` schema and migrate away from room vote arrays.
-2. [ ] Add per-user vote identity to eliminate duplicate toggles across clients.
+1. [ ] Add first-class `participants` table and migrate away from `rooms.users` array.
+2. [ ] Remove legacy `rooms.votes` column after stabilization.
 3. [ ] Add CI workflow and smoke tests.

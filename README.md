@@ -28,6 +28,8 @@ Apply migrations in order:
 - `supabase/migrations/001_init_rooms.sql`
 - `supabase/migrations/002_lockdown_admin.sql`
 - `supabase/migrations/003_atomic_vote_delta.sql`
+- `supabase/migrations/004_rounds_votes.sql`
+- `supabase/migrations/005_round_lifecycle_history.sql`
 
 ## Run
 ```bash

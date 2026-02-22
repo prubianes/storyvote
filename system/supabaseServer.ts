@@ -2,7 +2,7 @@ import 'server-only'
 
 import { createClient } from '@supabase/supabase-js'
 
-let supabaseServerClient
+let supabaseServerClient: ReturnType<typeof createClient> | undefined
 
 export function getSupabaseServer() {
   if (supabaseServerClient) {

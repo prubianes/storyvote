@@ -3,25 +3,27 @@
 import { RoomContext } from '@/components/RoomContext/roomContextProvider'
 import { ensureRoom, getAllUsersFromRoom, updateUsers } from '@/system/supabase'
 import { useRouter } from 'next/navigation'
-import { useContext, useState } from 'react'
+import { useContext, useState, type FormEvent } from 'react'
 
 export default function Page() {
   const router = useRouter()
   const { setUser, setRoom } = useContext(RoomContext)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleForm = async (e) => {
+  const handleForm = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
 
     try {
-      const form = e.target
-      const formData = new FormData(form)
-      const formJson = Object.fromEntries(formData.entries())
+      const formData = new FormData(e.currentTarget)
 
-      const username = formJson.user.trim()
-      const selectedRoom = formJson.room.trim()
-      const adminPasscode = formJson.adminPasscode?.trim() ?? ''
+      const username = String(formData.get('user') ?? '').trim()
+      const selectedRoom = String(formData.get('room') ?? '').trim()
+      const adminPasscode = String(formData.get('adminPasscode') ?? '').trim()
+
+      if (!username || !selectedRoom) {
+        return
+      }
 
       setUser(username)
       setRoom(selectedRoom)
