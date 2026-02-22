@@ -20,10 +20,14 @@ Create a `.env.local` file using `.env.example`:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ADMIN_SESSION_SECRET`
 
 ## Supabase migration
-Initial SQL schema is at:
+Apply migrations in order:
 - `supabase/migrations/001_init_rooms.sql`
+- `supabase/migrations/002_lockdown_admin.sql`
+- `supabase/migrations/003_atomic_vote_delta.sql`
 
 ## Run
 ```bash

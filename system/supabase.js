@@ -30,7 +30,7 @@ async function sha256(value) {
 export async function ensureRoom(room, adminPasscode = '') {
   const { data: existing, error: readError } = await getSupabase()
     .from('rooms')
-    .select('slug, admin_passcode_hash')
+    .select('slug')
     .eq('slug', room)
     .maybeSingle()
 
@@ -39,18 +39,6 @@ export async function ensureRoom(room, adminPasscode = '') {
   }
 
   if (existing) {
-    if (adminPasscode && !existing.admin_passcode_hash) {
-      const adminPasscodeHash = await sha256(adminPasscode)
-      const { error: updateError } = await getSupabase()
-        .from('rooms')
-        .update({ admin_passcode_hash: adminPasscodeHash })
-        .eq('slug', room)
-
-      if (updateError) {
-        throw updateError
-      }
-    }
-
     return
   }
 
@@ -73,7 +61,7 @@ export async function ensureRoom(room, adminPasscode = '') {
 export async function getRoom(room) {
   const { data, error } = await getSupabase()
     .from('rooms')
-    .select('story, votes, users, admin_passcode_hash')
+    .select('story, votes, users')
     .eq('slug', room)
     .single()
 
@@ -82,39 +70,6 @@ export async function getRoom(room) {
   }
 
   return data
-}
-
-export async function verifyAdminPasscode(room, passcode) {
-  const { data, error } = await getSupabase()
-    .from('rooms')
-    .select('admin_passcode_hash')
-    .eq('slug', room)
-    .single()
-
-  if (error) {
-    throw error
-  }
-
-  if (!data.admin_passcode_hash) {
-    return true
-  }
-
-  const providedHash = await sha256(passcode)
-  return providedHash === data.admin_passcode_hash
-}
-
-export async function getAdminPasscodeHash(room) {
-  const { data, error } = await getSupabase()
-    .from('rooms')
-    .select('admin_passcode_hash')
-    .eq('slug', room)
-    .single()
-
-  if (error) {
-    throw error
-  }
-
-  return data.admin_passcode_hash
 }
 
 export async function getAllUsersFromRoom(room) {
@@ -134,25 +89,25 @@ export async function updateUsers(users, room) {
 }
 
 export async function updateVotes(votes, room) {
-  const { error } = await getSupabase()
-    .from('rooms')
-    .update({ votes })
-    .eq('slug', room)
+  const { error } = await getSupabase().from('rooms').update({ votes }).eq('slug', room)
 
   if (error) {
     throw error
   }
 }
 
-export async function updateStory(story, room) {
-  const { error } = await getSupabase()
-    .from('rooms')
-    .update({ story })
-    .eq('slug', room)
+export async function applyVoteDelta(room, voteIndex, delta) {
+  const { data, error } = await getSupabase().rpc('apply_vote_delta', {
+    p_room_slug: room,
+    p_vote_index: voteIndex,
+    p_delta: delta,
+  })
 
   if (error) {
     throw error
   }
+
+  return data
 }
 
 export function subscribeToRoom(room, onChange) {
