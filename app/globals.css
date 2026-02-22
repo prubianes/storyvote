@@ -1,42 +1,24 @@
-@media (min-width: 1200px) {
-  body > header,
-  body > main,
-  body > footer,
-  section {
-    --block-spacing-vertical: calc(var(--spacing) * 1);
-  }
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
 }
 
-@media (min-width: 992px) {
-main .grid {
-  grid-column-gap: 1.25rem;
-  grid-template-columns: auto 25%;
-}
-}
-
-form.grid{
-grid-column-gap: 1.25rem;
-grid-template-columns: repeat(auto-fit,minmax(0%,1fr));
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+  background:
+    radial-gradient(circle at 20% 20%, rgb(14 116 144 / 22%) 0%, transparent 40%),
+    radial-gradient(circle at 80% 0%, rgb(15 23 42 / 90%) 0%, transparent 40%),
+    rgb(2 6 23);
 }
 
-p.grid{
-grid-column-gap: 1.25rem;
-grid-template-columns: repeat(auto-fit,minmax(0%,1fr));
+input,
+select,
+button {
+  font: inherit;
 }
 
-section.grid{
-  grid-column-gap: 1.25rem;
-  grid-template-columns: repeat(auto-fit,minmax(0%,1fr));
-}
-
-h1,h2,h3,h4,h5,h6 {
-  margin-bottom: 0px;
-}
-
-.username {
-  text-align: right;
-}
-
-header.container{
-  padding: 2%;
+button {
+  cursor: pointer;
 }

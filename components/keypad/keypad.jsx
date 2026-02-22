@@ -1,81 +1,68 @@
-import { db } from '@/system/firebase'
-import { ref, update } from 'firebase/database'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { updateVotes } from '@/system/supabase'
 
-export default function Keypad( {votes, room} ) {
-    const values = [1,2,3,5,8,13,20,'∞']
-    const [userVote, setUserVote] = useState([false, 0])
-    const [maxVotes, setMaxVotes] = useState(1)
+export default function Keypad({ votes, room, onVotesChange }) {
+  const values = useMemo(() => [1, 2, 3, 5, 8, 13, 20, '∞'], [])
+  const [selectedVote, setSelectedVote] = useState(null)
 
-    useEffect(() => {
-        const max = votes.reduce((partial, a) => partial+a, 0)
-        setMaxVotes(max)
-        if(max === 0){
-            if(userVote[1] !== 0){
-                const button = document.getElementById(userVote[1]).classList.remove('contrast')
-                updateVoteState(0, false);
-            }
-        }
-    }, [votes])
-    
-    const handleVote = (vote) => {
-        let indexValue = values.indexOf(vote)
-        if(!userVote[0]){
-            const newVotes = votes.map((total, index) => {
-                if ( index === indexValue){
-                    return total + 1
-                } else {
-                    return total
-                }
-            })
-            const button = document.getElementById(vote).classList.add('contrast')
-            updateVoteState(vote, true)
-            writeVotesDB(newVotes)
-        } else {
-            if(vote === userVote[1]){
-                const newVotes = votes.map((total, index) => {
-                    if ( index === indexValue){
-                        return total - 1
-                    } else {
-                        return total
-                    }
-                })
-                const button = document.getElementById(vote).classList.remove('contrast')
-                updateVoteState(0, false)
-                writeVotesDB(newVotes)
-            }
-        }
+  useEffect(() => {
+    const totalVotes = votes.reduce((partial, value) => partial + value, 0)
+    if (totalVotes === 0) {
+      setSelectedVote(null)
     }
-    
-    const buttonList = values.map(value => (
-        <button key={value} id={value} onClick={() => handleVote(value)}>{value}</button>
-    ))
+  }, [votes])
 
-    const progressList = values.map((value, index) => (
-        <div key={'key'+value}>
-            {value}
-            <progress value={votes[index]} max={maxVotes} />
-        </div>
-        )
-    )
-    
-    const updateVoteState = (vote, haveVote) => {
-        setUserVote([haveVote, vote])
+  const maxVotes = votes.reduce((partial, value) => partial + value, 0) || 1
+
+  const handleVote = async (vote) => {
+    const indexValue = values.indexOf(vote)
+
+    if (selectedVote === null) {
+      const newVotes = votes.map((total, index) => (index === indexValue ? total + 1 : total))
+      setSelectedVote(vote)
+      onVotesChange?.(newVotes)
+      await updateVotes(newVotes, room)
+      return
     }
 
-    const writeVotesDB = (newVotes) => {
-        update(ref(db, 'rooms/' + room ), {
-            votes: newVotes
-        })
+    if (selectedVote === vote) {
+      const newVotes = votes.map((total, index) => (index === indexValue ? total - 1 : total))
+      setSelectedVote(null)
+      onVotesChange?.(newVotes)
+      await updateVotes(newVotes, room)
     }
-    
-    return (
-        <>
-            <section className='grid'>
-                {buttonList}
-            </section>
-            {progressList}
-        </>
-    )
+  }
 
+  return (
+    <>
+      <section className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {values.map((value) => {
+          const isSelected = selectedVote === value
+          return (
+            <button
+              key={value}
+              type="button"
+              onClick={() => handleVote(value)}
+              className={`rounded-xl border px-4 py-4 text-lg font-semibold transition ${
+                isSelected
+                  ? 'border-cyan-300 bg-cyan-500 text-slate-950'
+                  : 'border-slate-700 bg-slate-900 text-slate-100 hover:border-cyan-600 hover:bg-slate-800'
+              }`}
+            >
+              {value}
+            </button>
+          )
+        })}
+      </section>
+
+      <section className="space-y-3">
+        {values.map((value, index) => (
+          <div key={`key-${value}`}>
+            <p className="mb-1 text-sm text-slate-300">{value}</p>
+            <progress className="h-3 w-full" value={votes[index]} max={maxVotes} />
+          </div>
+        ))}
+      </section>
+    </>
+  )
 }
