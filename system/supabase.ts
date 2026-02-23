@@ -63,6 +63,41 @@ async function sha256(value: string): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
+export function getOrCreateSessionId(): string {
+  if (typeof window === 'undefined') {
+    return 'server'
+  }
+
+  let sessionId = localStorage.getItem('storyvote_session_id')
+  if (!sessionId) {
+    sessionId = crypto.randomUUID()
+    localStorage.setItem('storyvote_session_id', sessionId)
+  }
+  return sessionId
+}
+
+export function buildVoterKey(displayName: string): string {
+  return `${displayName}::${getOrCreateSessionId()}`
+}
+
+export async function upsertParticipantPresence(
+  room: string,
+  displayName: string,
+  isActive = true
+): Promise<void> {
+  const voterKey = buildVoterKey(displayName)
+  await callRpc<null>('upsert_participant_presence', {
+    p_room_slug: room,
+    p_voter_key: voterKey,
+    p_display_name: displayName,
+    p_is_active: isActive,
+  })
+}
+
+export async function markParticipantLeft(room: string, displayName: string): Promise<void> {
+  await upsertParticipantPresence(room, displayName, false)
+}
+
 export async function ensureRoom(room: string, adminPasscode = ''): Promise<void> {
   const { data: existing, error: readError } = await getDb()
     .from('rooms')
@@ -101,7 +136,7 @@ export async function ensureActiveRound(room: string): Promise<void> {
 }
 
 export async function getRoom(room: string): Promise<RoomState> {
-  const { data, error } = await getDb().from('rooms').select('story, users').eq('slug', room).single()
+  const { data, error } = await getDb().from('rooms').select('story').eq('slug', room).single()
 
   if (error) {
     throw error
@@ -109,7 +144,7 @@ export async function getRoom(room: string): Promise<RoomState> {
 
   return {
     story: data.story,
-    users: data.users ?? [],
+    users: [],
     votes: initialVoteState,
     round_id: null,
     round_active: false,
@@ -169,7 +204,7 @@ export async function castVote(
 }
 
 export async function getAllUsersFromRoom(room: string): Promise<string[]> {
-  const roomData = await getRoom(room)
+  const roomData = await getRoomState(room)
   return roomData.users ?? []
 }
 
@@ -200,6 +235,16 @@ export function subscribeToRoom(room: string, onChange: () => void | Promise<voi
         event: '*',
         schema: 'public',
         table: 'rounds',
+        filter: `room_slug=eq.${room}`,
+      },
+      onChange
+    )
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'participants',
         filter: `room_slug=eq.${room}`,
       },
       onChange

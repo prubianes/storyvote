@@ -8,6 +8,7 @@ This branch is the reboot foundation:
 - Supabase client + initial schema migration
 - Firebase runtime usage removed
 - Updated UI shell and voting screens
+- Rounds lifecycle/history and participants heartbeat
 
 ## Stack
 - Next.js (App Router)
@@ -30,6 +31,13 @@ Apply migrations in order:
 - `supabase/migrations/003_atomic_vote_delta.sql`
 - `supabase/migrations/004_rounds_votes.sql`
 - `supabase/migrations/005_round_lifecycle_history.sql`
+- `supabase/migrations/006_participants_heartbeat.sql`
+
+## Presence behavior
+- Participant joins room on lobby submit.
+- Heartbeat updates every 60 seconds while user is on the room page.
+- Stale participants are marked inactive after 5 minutes without heartbeat.
+- Participant is marked inactive on logout and room unmount (best effort).
 
 ## Run
 ```bash

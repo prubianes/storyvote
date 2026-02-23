@@ -8,14 +8,14 @@ interface KeypadProps {
   votes: number[]
   room: string
   roundActive: boolean
+  voterKey: string
   onVotesChange?: Dispatch<SetStateAction<number[]>>
 }
 
-export default function Keypad({ votes, room, roundActive, onVotesChange }: KeypadProps) {
+export default function Keypad({ votes, room, roundActive, voterKey, onVotesChange }: KeypadProps) {
   const availableVotes = useMemo(() => values, [])
   const [selectedVote, setSelectedVote] = useState<number | '∞' | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [voterKey, setVoterKey] = useState('')
   const [voteError, setVoteError] = useState('')
 
   useEffect(() => {
@@ -24,18 +24,6 @@ export default function Keypad({ votes, room, roundActive, onVotesChange }: Keyp
       setSelectedVote(null)
     }
   }, [votes])
-
-  useEffect(() => {
-    const user = localStorage.getItem('user') || 'guest'
-    let sessionId = localStorage.getItem('storyvote_session_id')
-
-    if (!sessionId) {
-      sessionId = crypto.randomUUID()
-      localStorage.setItem('storyvote_session_id', sessionId)
-    }
-
-    setVoterKey(`${user}::${sessionId}`)
-  }, [])
 
   const maxVotes = votes.reduce((partial, value) => partial + value, 0) || 1
 

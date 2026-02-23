@@ -4,18 +4,24 @@ import Keypad from '@/components/keypad/keypad'
 import Aside from '@/components/aside/aside'
 import RoundHistory from '@/components/history/roundHistory'
 import {
+  buildVoterKey,
   ensureRoom,
   getRoomHistory,
   getRoomState,
   initialVoteState,
+  markParticipantLeft,
   subscribeToRoom,
   unsubscribeFromRoom,
+  upsertParticipantPresence,
   type HistoryRound,
   type RoomState,
 } from '@/system/supabase'
 import { useParams, usePathname, useRouter } from 'next/navigation'
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { RoomContext } from '@/components/RoomContext/roomContextProvider'
+
+const HEARTBEAT_INTERVAL_MS = 60_000
+const INACTIVITY_TIMEOUT_MS = 5 * 60_000
 
 export default function Page() {
   const [votes, setVotes] = useState<number[]>(initialVoteState)
@@ -28,6 +34,13 @@ export default function Page() {
   const roomSlug = Array.isArray(params.rooms) ? params.rooms[0] : params.rooms
   const router = useRouter()
   const pathname = usePathname()
+  const [displayName, setDisplayName] = useState('')
+  const lastInteractionRef = useRef<number>(Date.now())
+  const isPresenceActiveRef = useRef<boolean>(true)
+
+  useEffect(() => {
+    setDisplayName(localStorage.getItem('user') || '')
+  }, [])
 
   const syncRoomSnapshot = (data: RoomState) => {
     setVotes(data.votes ?? initialVoteState)
@@ -44,30 +57,54 @@ export default function Page() {
   }, [roomSlug, setRoom])
 
   useEffect(() => {
-    if (!roomSlug) {
+    if (!roomSlug || !displayName) {
       return
     }
 
     let mounted = true
     let channel: ReturnType<typeof subscribeToRoom> | undefined
     let pollId: ReturnType<typeof setInterval> | undefined
+    let heartbeatId: ReturnType<typeof setInterval> | undefined
+
+    const recordInteraction = () => {
+      lastInteractionRef.current = Date.now()
+      if (!isPresenceActiveRef.current) {
+        isPresenceActiveRef.current = true
+        void upsertParticipantPresence(roomSlug, displayName, true)
+      }
+    }
+
+    const interactionEvents: Array<keyof WindowEventMap> = [
+      'pointerdown',
+      'keydown',
+      'touchstart',
+      'scroll',
+    ]
+
+    interactionEvents.forEach((eventName) =>
+      window.addEventListener(eventName, recordInteraction, { passive: true })
+    )
+
+    async function syncRoomAndHistory() {
+      const [latest, latestHistory] = await Promise.all([
+        getRoomState(roomSlug),
+        getRoomHistory(roomSlug),
+      ])
+      syncRoomSnapshot(latest)
+      setHistory(latestHistory)
+    }
 
     async function loadRoom() {
       await ensureRoom(roomSlug)
-      const [data, roundHistory] = await Promise.all([getRoomState(roomSlug), getRoomHistory(roomSlug)])
-
-      if (mounted) {
-        syncRoomSnapshot(data)
-        setHistory(roundHistory)
-      }
+      await upsertParticipantPresence(roomSlug, displayName, true)
+      isPresenceActiveRef.current = true
+      await syncRoomAndHistory()
 
       channel = subscribeToRoom(roomSlug, async () => {
-        const [latest, latestHistory] = await Promise.all([
-          getRoomState(roomSlug),
-          getRoomHistory(roomSlug),
-        ])
-        syncRoomSnapshot(latest)
-        setHistory(latestHistory)
+        if (!mounted) {
+          return
+        }
+        await syncRoomAndHistory()
       })
 
       pollId = setInterval(async () => {
@@ -75,16 +112,34 @@ export default function Page() {
           return
         }
         try {
-          const [latest, latestHistory] = await Promise.all([
-            getRoomState(roomSlug),
-            getRoomHistory(roomSlug),
-          ])
-          syncRoomSnapshot(latest)
-          setHistory(latestHistory)
+          await syncRoomAndHistory()
         } catch {
           // Ignore transient fetch errors and keep polling.
         }
       }, 2000)
+
+      heartbeatId = setInterval(async () => {
+        if (!mounted) {
+          return
+        }
+        try {
+          const now = Date.now()
+          const isInactive = now - lastInteractionRef.current >= INACTIVITY_TIMEOUT_MS
+
+          if (isInactive) {
+            if (isPresenceActiveRef.current) {
+              await upsertParticipantPresence(roomSlug, displayName, false)
+              isPresenceActiveRef.current = false
+            }
+            return
+          }
+
+          await upsertParticipantPresence(roomSlug, displayName, true)
+          isPresenceActiveRef.current = true
+        } catch {
+          // Ignore transient heartbeat errors.
+        }
+      }, HEARTBEAT_INTERVAL_MS)
     }
 
     void loadRoom()
@@ -97,8 +152,17 @@ export default function Page() {
       if (pollId) {
         clearInterval(pollId)
       }
+      if (heartbeatId) {
+        clearInterval(heartbeatId)
+      }
+      interactionEvents.forEach((eventName) => window.removeEventListener(eventName, recordInteraction))
+
+      // Best effort presence mark on route leave/unmount.
+      void markParticipantLeft(roomSlug, displayName)
     }
-  }, [roomSlug])
+  }, [displayName, roomSlug])
+
+  const voterKey = displayName ? buildVoterKey(displayName) : ''
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 pb-12 sm:px-6">
@@ -122,6 +186,7 @@ export default function Page() {
             votes={votes}
             room={roomSlug ?? ''}
             roundActive={roundActive}
+            voterKey={voterKey}
             onVotesChange={setVotes}
           />
         </section>

@@ -1,10 +1,11 @@
 'use client'
 
-import { useContext, useEffect } from 'react'
-import { RoomContext } from '../RoomContext/roomContextProvider'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { getAllUsersFromRoom, updateUsers } from '@/system/supabase'
+import { useContext, useEffect } from 'react'
+
+import { RoomContext } from '../RoomContext/roomContextProvider'
+import { markParticipantLeft } from '@/system/supabase'
 
 export default function Header() {
   const { user, setUser, room, setRoom } = useContext(RoomContext)
@@ -22,9 +23,7 @@ export default function Header() {
       return
     }
 
-    const loggedUsers = await getAllUsersFromRoom(room)
-    const newUsers = loggedUsers.filter((logged) => logged !== user)
-    await updateUsers(newUsers, room)
+    await markParticipantLeft(room, user)
 
     localStorage.removeItem('user')
     setUser('')

@@ -1,7 +1,12 @@
 'use client'
 
 import { RoomContext } from '@/components/RoomContext/roomContextProvider'
-import { ensureRoom, getAllUsersFromRoom, updateUsers } from '@/system/supabase'
+import {
+  ensureRoom,
+  getAllUsersFromRoom,
+  getOrCreateSessionId,
+  upsertParticipantPresence,
+} from '@/system/supabase'
 import { useRouter } from 'next/navigation'
 import { useContext, useState, type FormEvent } from 'react'
 
@@ -29,11 +34,16 @@ export default function Page() {
       setRoom(selectedRoom)
 
       await ensureRoom(selectedRoom, adminPasscode)
+      await upsertParticipantPresence(selectedRoom, username, true)
+
       const loggedUsers = await getAllUsersFromRoom(selectedRoom)
-      const deduped = [...new Set([...loggedUsers, username])]
-      await updateUsers(deduped, selectedRoom)
+      const isInRoom = loggedUsers.includes(username)
+      if (!isInRoom) {
+        await upsertParticipantPresence(selectedRoom, username, true)
+      }
 
       localStorage.setItem('user', username)
+      getOrCreateSessionId()
       router.push(`/${selectedRoom}`)
     } finally {
       setIsSubmitting(false)
