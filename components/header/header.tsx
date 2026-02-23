@@ -24,6 +24,9 @@ export default function Header() {
     }
 
     await markParticipantLeft(room, user)
+    await fetch(`/api/admin/session?room=${encodeURIComponent(room)}`, {
+      method: 'DELETE',
+    }).catch(() => undefined)
 
     localStorage.removeItem('user')
     setUser('')

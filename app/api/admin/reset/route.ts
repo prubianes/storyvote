@@ -21,14 +21,13 @@ export async function POST(request: NextRequest) {
   }
 
   const db: any = getSupabaseServer()
-  const { error } = await db.rpc('start_new_round', {
+  const { data, error } = await db.rpc('reset_active_round_votes', {
     p_room_slug: room,
-    p_story: null,
   })
 
   if (error) {
     return NextResponse.json({ error: 'Failed to reset votes.' }, { status: 500 })
   }
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, deleted_votes: Number(data ?? 0) })
 }

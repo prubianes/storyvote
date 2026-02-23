@@ -32,11 +32,13 @@ Apply migrations in order:
 - `supabase/migrations/004_rounds_votes.sql`
 - `supabase/migrations/005_round_lifecycle_history.sql`
 - `supabase/migrations/006_participants_heartbeat.sql`
+- `supabase/migrations/007_reset_votes_only.sql`
+- `supabase/migrations/008_room_state_voted_users.sql`
 
 ## Presence behavior
 - Participant joins room on lobby submit.
-- Heartbeat updates every 60 seconds while user is on the room page.
-- Stale participants are marked inactive after 5 minutes without heartbeat.
+- Heartbeat updates every 60 seconds while user is active on the room page.
+- Inactive users (no interaction for 5 minutes) are marked inactive.
 - Participant is marked inactive on logout and room unmount (best effort).
 
 ## Run

@@ -1,9 +1,10 @@
 interface AsideProps {
   users: string[]
+  votedUsers?: string[]
   votes: number[]
 }
 
-export default function Aside({ users, votes }: AsideProps) {
+export default function Aside({ users, votedUsers = [], votes }: AsideProps) {
   const numberOfVotes = votes.reduce((partial, value) => partial + value, 0)
 
   return (
@@ -16,8 +17,11 @@ export default function Aside({ users, votes }: AsideProps) {
       </h4>
       <ul className="space-y-2 text-sm text-slate-200">
         {(users ?? []).map((user) => (
-          <li key={user} className="rounded-md bg-slate-800/90 px-3 py-2">
-            {user}
+          <li key={user} className="flex items-center justify-between rounded-md bg-slate-800/90 px-3 py-2">
+            <span>{user}</span>
+            <span className={`text-xs ${votedUsers.includes(user) ? 'text-emerald-300' : 'text-slate-500'}`}>
+              {votedUsers.includes(user) ? '✓' : '·'}
+            </span>
           </li>
         ))}
       </ul>

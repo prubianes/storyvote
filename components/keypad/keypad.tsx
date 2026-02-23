@@ -53,11 +53,15 @@ export default function Keypad({ votes, room, roundActive, voterKey, onVotesChan
 
   return (
     <>
-      {!roundActive ? (
+      {roundActive ? (
+        <p className="mb-4 rounded-lg border border-emerald-400/40 bg-emerald-300/10 px-3 py-2 text-sm text-emerald-200">
+          Votación abierta. Selecciona tu carta.
+        </p>
+      ) : (
         <p className="mb-4 rounded-lg border border-amber-400/40 bg-amber-300/10 px-3 py-2 text-sm text-amber-200">
           La ronda está cerrada. Un admin debe iniciar una nueva ronda.
         </p>
-      ) : null}
+      )}
       <section className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {availableVotes.map((value) => {
           const isSelected = selectedVote === value

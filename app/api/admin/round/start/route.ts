@@ -16,6 +16,9 @@ export async function POST(request: NextRequest) {
   if (!room) {
     return NextResponse.json({ error: 'Missing room.' }, { status: 400 })
   }
+  if (!story) {
+    return NextResponse.json({ error: 'Missing story.' }, { status: 400 })
+  }
 
   const token = request.cookies.get(getAdminCookieName(room))?.value
   if (!verifyAdminSessionToken(token, room)) {
@@ -25,18 +28,16 @@ export async function POST(request: NextRequest) {
   const db: any = getSupabaseServer()
   const { error } = await db.rpc('start_new_round', {
     p_room_slug: room,
-    p_story: story || null,
+    p_story: story,
   })
 
   if (error) {
     return NextResponse.json({ error: 'Failed to start round.' }, { status: 500 })
   }
 
-  if (story) {
-    const { error: roomError } = await db.from('rooms').update({ story }).eq('slug', room)
-    if (roomError) {
-      return NextResponse.json({ error: 'Failed to update story.' }, { status: 500 })
-    }
+  const { error: roomError } = await db.from('rooms').update({ story }).eq('slug', room)
+  if (roomError) {
+    return NextResponse.json({ error: 'Failed to update story.' }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })

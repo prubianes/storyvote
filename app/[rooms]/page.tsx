@@ -2,6 +2,7 @@
 
 import Keypad from '@/components/keypad/keypad'
 import Aside from '@/components/aside/aside'
+import AdminInlinePanel from '@/components/admin/adminInlinePanel'
 import RoundHistory from '@/components/history/roundHistory'
 import {
   buildVoterKey,
@@ -16,8 +17,8 @@ import {
   type HistoryRound,
   type RoomState,
 } from '@/system/supabase'
-import { useParams, usePathname, useRouter } from 'next/navigation'
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useParams } from 'next/navigation'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { RoomContext } from '@/components/RoomContext/roomContextProvider'
 
 const HEARTBEAT_INTERVAL_MS = 60_000
@@ -27,13 +28,12 @@ export default function Page() {
   const [votes, setVotes] = useState<number[]>(initialVoteState)
   const [story, setStory] = useState('')
   const [users, setUsers] = useState<string[]>([])
+  const [votedUsers, setVotedUsers] = useState<string[]>([])
   const [roundActive, setRoundActive] = useState(true)
   const [history, setHistory] = useState<HistoryRound[]>([])
   const { setRoom } = useContext(RoomContext)
   const params = useParams<{ rooms: string | string[] }>()
   const roomSlug = Array.isArray(params.rooms) ? params.rooms[0] : params.rooms
-  const router = useRouter()
-  const pathname = usePathname()
   const [displayName, setDisplayName] = useState('')
   const lastInteractionRef = useRef<number>(Date.now())
   const isPresenceActiveRef = useRef<boolean>(true)
@@ -46,8 +46,15 @@ export default function Page() {
     setVotes(data.votes ?? initialVoteState)
     setStory(data.story ?? '')
     setUsers(data.users ?? [])
+    setVotedUsers(data.voted_users ?? [])
     setRoundActive(Boolean(data.round_active))
   }
+
+  const syncRoomAndHistory = useCallback(async (slug: string) => {
+    const [latest, latestHistory] = await Promise.all([getRoomState(slug), getRoomHistory(slug)])
+    syncRoomSnapshot(latest)
+    setHistory(latestHistory)
+  }, [])
 
   useEffect(() => {
     if (!roomSlug) {
@@ -85,26 +92,17 @@ export default function Page() {
       window.addEventListener(eventName, recordInteraction, { passive: true })
     )
 
-    async function syncRoomAndHistory() {
-      const [latest, latestHistory] = await Promise.all([
-        getRoomState(roomSlug),
-        getRoomHistory(roomSlug),
-      ])
-      syncRoomSnapshot(latest)
-      setHistory(latestHistory)
-    }
-
     async function loadRoom() {
       await ensureRoom(roomSlug)
       await upsertParticipantPresence(roomSlug, displayName, true)
       isPresenceActiveRef.current = true
-      await syncRoomAndHistory()
+      await syncRoomAndHistory(roomSlug)
 
       channel = subscribeToRoom(roomSlug, async () => {
         if (!mounted) {
           return
         }
-        await syncRoomAndHistory()
+        await syncRoomAndHistory(roomSlug)
       })
 
       pollId = setInterval(async () => {
@@ -112,7 +110,7 @@ export default function Page() {
           return
         }
         try {
-          await syncRoomAndHistory()
+          await syncRoomAndHistory(roomSlug)
         } catch {
           // Ignore transient fetch errors and keep polling.
         }
@@ -160,7 +158,7 @@ export default function Page() {
       // Best effort presence mark on route leave/unmount.
       void markParticipantLeft(roomSlug, displayName)
     }
-  }, [displayName, roomSlug])
+  }, [displayName, roomSlug, syncRoomAndHistory])
 
   const voterKey = displayName ? buildVoterKey(displayName) : ''
 
@@ -168,18 +166,18 @@ export default function Page() {
     <main className="mx-auto w-full max-w-6xl px-4 pb-12 sm:px-6">
       <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
         <section className="rounded-2xl border border-slate-700 bg-slate-900/70 p-6 shadow-lg shadow-slate-950/30">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-cyan-300">Historia actual</p>
-              <h3 className="text-xl font-semibold text-slate-100">{story || 'Sin historia definida'}</h3>
-            </div>
-            <button
-              type="button"
-              onClick={() => router.push(`${pathname}/admin`)}
-              className="rounded-lg border border-slate-600 px-3 py-2 text-sm font-medium text-slate-200 transition hover:border-cyan-500 hover:text-cyan-300"
-            >
-              Admin
-            </button>
+          <div className="mb-6">
+            <p className="text-xs uppercase tracking-wide text-cyan-300">Historia actual</p>
+            <h3 className="text-xl font-semibold text-slate-100">{story || 'Sin historia definida'}</h3>
+          </div>
+
+          <div className="mb-5">
+            <AdminInlinePanel
+              roomSlug={roomSlug ?? ''}
+              roundActive={roundActive}
+              currentStory={story}
+              onRoomUpdated={() => (roomSlug ? syncRoomAndHistory(roomSlug) : Promise.resolve())}
+            />
           </div>
 
           <Keypad
@@ -191,7 +189,7 @@ export default function Page() {
           />
         </section>
 
-        <Aside users={users} votes={votes} />
+        <Aside users={users} votedUsers={votedUsers} votes={votes} />
       </div>
 
       <div className="mt-6">

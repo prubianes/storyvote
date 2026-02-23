@@ -29,6 +29,7 @@ export interface RoomState {
   round_active: boolean
   story: string
   users: string[]
+  voted_users: string[]
   votes: number[]
 }
 
@@ -127,8 +128,6 @@ export async function ensureRoom(room: string, adminPasscode = ''): Promise<void
   if (insertError) {
     throw insertError
   }
-
-  await ensureActiveRound(room)
 }
 
 export async function ensureActiveRound(room: string): Promise<void> {
@@ -145,6 +144,7 @@ export async function getRoom(room: string): Promise<RoomState> {
   return {
     story: data.story,
     users: [],
+    voted_users: [],
     votes: initialVoteState,
     round_id: null,
     round_active: false,
@@ -157,6 +157,7 @@ export async function getRoomState(room: string): Promise<RoomState> {
     round_active: boolean
     story: string
     users: string[]
+    voted_users: string[]
     vote_counts: number[]
   }>('get_room_state', {
     p_room_slug: room,
@@ -167,6 +168,7 @@ export async function getRoomState(room: string): Promise<RoomState> {
     round_active: Boolean(data.round_active),
     story: data.story ?? '',
     users: data.users ?? [],
+    voted_users: data.voted_users ?? [],
     votes: data.vote_counts ?? initialVoteState,
   }
 }
