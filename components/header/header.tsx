@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 import { RoomContext } from '../RoomContext/roomContextProvider'
 import { markParticipantLeft } from '@/system/supabase'
@@ -10,6 +10,7 @@ import { markParticipantLeft } from '@/system/supabase'
 export default function Header() {
   const { user, setUser, room, setRoom } = useContext(RoomContext)
   const router = useRouter()
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user')
@@ -17,6 +18,17 @@ export default function Header() {
       setUser(savedUser)
     }
   }, [setUser])
+
+  useEffect(() => {
+    setTheme('dark')
+    document.documentElement.classList.remove('theme-light')
+  }, [])
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark'
+    setTheme(nextTheme)
+    document.documentElement.classList.toggle('theme-light', nextTheme === 'light')
+  }
 
   const resetAll = async () => {
     if (!room || !user) {
@@ -37,22 +49,33 @@ export default function Header() {
   return (
     <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-6 sm:px-6">
       <h1 className="flex items-center gap-3 text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">
-        <Image src="/logo.svg" width={42} height={42} alt="StoryVote Logo" priority />
+        <Image src="/logo.svg" width={42} height={42} alt="StoryVote Logo" priority className="theme-logo" />
         <span>{room ? `StoryVote @ ${room}` : 'StoryVote'}</span>
       </h1>
 
-      {user ? (
-        <div className="text-right">
-          <p className="text-sm text-slate-400">Hola {user}</p>
-          <button
-            type="button"
-            onClick={resetAll}
-            className="text-sm font-medium text-cyan-300 transition hover:text-cyan-200"
-          >
-            Salir
-          </button>
-        </div>
-      ) : null}
+      <div className="flex items-center gap-4">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="rounded-lg border border-slate-600 px-3 py-2 text-sm font-medium text-cyan-300 transition hover:border-cyan-500 hover:text-cyan-200"
+          aria-label={`Activar modo ${theme === 'dark' ? 'claro' : 'oscuro'}`}
+        >
+          {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+        </button>
+
+        {user ? (
+          <div className="text-right">
+            <p className="text-sm text-slate-400">Hola {user}</p>
+            <button
+              type="button"
+              onClick={resetAll}
+              className="text-sm font-medium text-cyan-300 transition hover:text-cyan-200"
+            >
+              Salir
+            </button>
+          </div>
+        ) : null}
+      </div>
     </header>
   )
 }
