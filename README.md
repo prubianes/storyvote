@@ -85,6 +85,12 @@ pnpm dev
 5. Open:
 - [http://localhost:3000](http://localhost:3000)
 
+6. (Optional) For E2E smoke tests, install Playwright tooling:
+```bash
+pnpm add -D @playwright/test
+pnpm exec playwright install --with-deps chromium
+```
+
 ## Scripts
 
 - `pnpm dev` - start dev server
@@ -92,6 +98,8 @@ pnpm dev
 - `pnpm start` - run production build
 - `pnpm lint` - lint project
 - `pnpm typecheck` - generate route types + TypeScript checks
+- `pnpm test:e2e` - run Playwright smoke tests
+- `pnpm test:e2e:headed` - run Playwright smoke tests in headed mode
 
 ## Presence / Heartbeat Rules
 

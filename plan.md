@@ -63,7 +63,9 @@ Reboot StoryVote with a modern Next.js stack, migrate backend from Firebase to S
 ### Phase 5: Quality Gates
 - [-] Re-enable strict hooks and linting rules.
 - [ ] Add typecheck, lint, test, and build CI workflow.
-- [ ] Add smoke tests for create room -> join -> vote -> reset.
+- [-] Add smoke tests for create room -> join -> vote -> reset.
+  - [x] Playwright smoke scaffolding added (`playwright.config.mjs`, `e2e/smoke.spec.mjs`).
+  - [ ] Install Playwright dependency/browsers and run smoke suite in CI.
 - [x] Local quality gates pass: `pnpm lint`, `pnpm typecheck`, `pnpm build`.
 
 ## Public Interfaces / Contracts
@@ -91,6 +93,7 @@ Reboot StoryVote with a modern Next.js stack, migrate backend from Firebase to S
 7. [x] Theme system refresh: dark-by-default startup, dark/light toggle with duotone icons, light-mode palette tuning (buttons/messages/background/logo/hover states).
 8. [x] Removed legacy `rooms.votes` path from runtime and DB grants; round votes now sourced exclusively from `votes`.
 9. [x] Presence lifecycle hardened with keepalive API updates on heartbeat, inactivity, and page hide/unload.
+10. [x] Added Playwright smoke-test scaffolding for home, 404, and new-room passcode requirement.
 
 ## Acceptance Criteria Progress
 - [x] No Firebase dependency in runtime code.
@@ -108,4 +111,5 @@ Reboot StoryVote with a modern Next.js stack, migrate backend from Firebase to S
   - Mitigation applied: server-side admin mutations with service role; client no longer mutates admin fields.
 
 ## Next Recommended Slice
-1. [ ] Add CI workflow and smoke tests.
+1. [ ] Install Playwright tooling in CI and run `pnpm test:e2e` in pipeline.
+2. [ ] Add CI workflow for lint, typecheck, build, and smoke tests.

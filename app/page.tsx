@@ -8,7 +8,7 @@ import {
   upsertParticipantPresence,
 } from '@/system/supabase'
 import { useRouter } from 'next/navigation'
-import { useContext, useEffect, useState, type FormEvent } from 'react'
+import { useContext, useEffect, useState, type FormEventHandler } from 'react'
 
 export default function Page() {
   const router = useRouter()
@@ -36,7 +36,7 @@ export default function Page() {
     setRoom('')
   }, [setRoom, setUser])
 
-  const handleForm = async (e: FormEvent<HTMLFormElement>) => {
+  const handleForm: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
     setFormError('')
