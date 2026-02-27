@@ -77,7 +77,7 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
     const voterKey = buildVoterKey(displayName)
 
     const postPresence = async (isActive: boolean, keepalive = false) => {
-      await fetch('/api/presence', {
+      const response = await fetch('/api/presence', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
@@ -86,6 +86,17 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
           displayName,
           isActive,
         }),
+        keepalive,
+      })
+
+      if (!response.ok) {
+        throw new Error(`Presence API failed: ${response.status}`)
+      }
+    }
+
+    const clearAdminSession = async (keepalive = false) => {
+      await fetch(`/api/admin/session?room=${encodeURIComponent(roomSlug)}`, {
+        method: 'DELETE',
         keepalive,
       })
     }
@@ -116,6 +127,7 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
       }
       isPresenceActiveRef.current = false
       void postPresence(false, true).catch(() => undefined)
+      void clearAdminSession(true).catch(() => undefined)
     }
 
     const interactionEvents: Array<keyof WindowEventMap> = [
@@ -199,6 +211,7 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
 
       // Best effort presence mark on route leave/unmount.
       void postPresence(false, true).catch(() => markParticipantLeft(roomSlug, displayName))
+      void clearAdminSession(true).catch(() => undefined)
     }
   }, [displayName, roomSlug, syncRoomAndHistory])
 

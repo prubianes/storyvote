@@ -22,6 +22,10 @@ export default function Page() {
 
     if (storedUser && storedRoom) {
       void upsertParticipantPresence(storedRoom, storedUser, false)
+      void fetch(`/api/admin/session?room=${encodeURIComponent(storedRoom)}`, {
+        method: 'DELETE',
+        keepalive: true,
+      }).catch(() => undefined)
     }
 
     sessionStorage.removeItem('user')
@@ -48,11 +52,10 @@ export default function Page() {
         return
       }
 
-      setUser(username)
-      setRoom(selectedRoom)
-
       const exists = await roomExists(selectedRoom)
       if (!exists && !adminPasscode) {
+        setUser('')
+        setRoom('')
         setFormError('Para crear una sala nueva debes definir passcode admin.')
         return
       }
@@ -60,6 +63,9 @@ export default function Page() {
       if (!exists) {
         await ensureRoom(selectedRoom, adminPasscode)
       }
+
+      setUser(username)
+      setRoom(selectedRoom)
       await upsertParticipantPresence(selectedRoom, username, true)
 
       sessionStorage.setItem('user', username)
