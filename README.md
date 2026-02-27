@@ -74,6 +74,8 @@ pnpm install
 - `/Users/pablo/Projects/storyvote/supabase/migrations/006_participants_heartbeat.sql`
 - `/Users/pablo/Projects/storyvote/supabase/migrations/007_reset_votes_only.sql`
 - `/Users/pablo/Projects/storyvote/supabase/migrations/008_room_state_voted_users.sql`
+- `/Users/pablo/Projects/storyvote/supabase/migrations/009_deprecate_rooms_users.sql`
+- `/Users/pablo/Projects/storyvote/supabase/migrations/010_remove_legacy_rooms_votes.sql`
 
 4. Start development server:
 ```bash
@@ -96,7 +98,7 @@ pnpm dev
 - User becomes active on room join.
 - Heartbeat runs every 60 seconds while the user is active.
 - If no interaction for 5 minutes, user is marked inactive.
-- On logout and page leave, app performs best-effort inactive mark.
+- On logout and page leave/hide, app sends keepalive inactive mark via `/api/presence`.
 
 ## Security Model (Current)
 
@@ -108,11 +110,11 @@ pnpm dev
   - `/api/admin/round/start`
   - `/api/admin/round/end`
   - `/api/admin/reset`
+  - `/api/presence`
 
 ## Known Next Improvements
 
 - Tighten RLS further for `rounds`, `votes`, and `participants`.
-- Complete participants normalization by deprecating legacy `rooms.users` writes.
 - Add CI and E2E smoke tests.
 - Add export/reporting for round history.
 

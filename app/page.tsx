@@ -3,21 +3,39 @@
 import { RoomContext } from '@/components/RoomContext/roomContextProvider'
 import {
   ensureRoom,
-  getAllUsersFromRoom,
   getOrCreateSessionId,
+  roomExists,
   upsertParticipantPresence,
 } from '@/system/supabase'
 import { useRouter } from 'next/navigation'
-import { useContext, useState, type FormEvent } from 'react'
+import { useContext, useEffect, useState, type FormEvent } from 'react'
 
 export default function Page() {
   const router = useRouter()
   const { setUser, setRoom } = useContext(RoomContext)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formError, setFormError] = useState('')
+
+  useEffect(() => {
+    const storedUser = sessionStorage.getItem('user') || localStorage.getItem('user')
+    const storedRoom = sessionStorage.getItem('room') || localStorage.getItem('room')
+
+    if (storedUser && storedRoom) {
+      void upsertParticipantPresence(storedRoom, storedUser, false)
+    }
+
+    sessionStorage.removeItem('user')
+    sessionStorage.removeItem('room')
+    localStorage.removeItem('user')
+    localStorage.removeItem('room')
+    setUser('')
+    setRoom('')
+  }, [setRoom, setUser])
 
   const handleForm = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setFormError('')
 
     try {
       const formData = new FormData(e.currentTarget)
@@ -33,16 +51,19 @@ export default function Page() {
       setUser(username)
       setRoom(selectedRoom)
 
-      await ensureRoom(selectedRoom, adminPasscode)
-      await upsertParticipantPresence(selectedRoom, username, true)
-
-      const loggedUsers = await getAllUsersFromRoom(selectedRoom)
-      const isInRoom = loggedUsers.includes(username)
-      if (!isInRoom) {
-        await upsertParticipantPresence(selectedRoom, username, true)
+      const exists = await roomExists(selectedRoom)
+      if (!exists && !adminPasscode) {
+        setFormError('Para crear una sala nueva debes definir passcode admin.')
+        return
       }
 
-      localStorage.setItem('user', username)
+      if (!exists) {
+        await ensureRoom(selectedRoom, adminPasscode)
+      }
+      await upsertParticipantPresence(selectedRoom, username, true)
+
+      sessionStorage.setItem('user', username)
+      sessionStorage.setItem('room', selectedRoom)
       getOrCreateSessionId()
       router.push(`/${selectedRoom}`)
     } finally {
@@ -102,6 +123,7 @@ export default function Page() {
           >
             {isSubmitting ? 'Entrando...' : 'Entrar'}
           </button>
+          {formError ? <p className="text-sm text-rose-300">{formError}</p> : null}
         </form>
       </section>
     </main>

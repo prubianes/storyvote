@@ -29,7 +29,8 @@ Reboot StoryVote with a modern Next.js stack, migrate backend from Firebase to S
 - [-] Implement Supabase schema for rooms/participants/rounds/votes.
   - [x] Rooms schema + migrations `001`, `002`, `003`.
   - [-] Rounds/votes normalized schema started in migration `004`.
-  - [ ] Participant model still pending.
+  - [x] Participant model live via dedicated table + heartbeat (`006`, `008`, `009`).
+  - [x] Legacy room aggregate columns deprecated from client writes (`009`, `010`).
 - [x] Add centralized data-access module for room operations.
 - [x] Replace Firebase calls in pages/components with Supabase operations.
 - [-] Add realtime subscriptions for room updates.
@@ -41,8 +42,11 @@ Reboot StoryVote with a modern Next.js stack, migrate backend from Firebase to S
 ### Phase 3: UI Rebuild (Tailwind)
 - [x] Rebuild lobby, room, and admin screens with Tailwind.
 - [-] Establish design tokens and reusable UI patterns.
+  - [x] Global theme scaffolding for dark/light mode (`html.theme-light` + palette overrides).
 - [x] Remove Pico-specific classes/styles.
 - [-] Improve mobile-first layout and interaction feedback.
+  - [x] Added header theme toggle with accessible icon states.
+  - [x] Added explicit hover feedback for admin controls in light mode.
 
 ### Phase 4: Security + Product Hardening
 - [x] Add room admin passcode flow and secure validation path.
@@ -53,7 +57,7 @@ Reboot StoryVote with a modern Next.js stack, migrate backend from Firebase to S
   - [ ] Tighten policies further after rounds/votes migration.
 - [-] Add session lifecycle handling (join/leave/refresh).
   - [x] Join/leave user list and logout cleanup.
-  - [ ] Presence heartbeat/stale cleanup.
+  - [x] Presence heartbeat/stale cleanup.
 - [-] Add explicit empty/error/loading states.
 
 ### Phase 5: Quality Gates
@@ -70,7 +74,7 @@ Reboot StoryVote with a modern Next.js stack, migrate backend from Firebase to S
 - [-] Shared domain models:
   - [x] Room-level model and vote array flow
   - [-] `Round` + normalized `Vote` flow is implemented (current room state + cast RPC)
-  - [ ] `Participant` model pending
+  - [x] `Participant` model backed by `participants` table and presence RPCs
 - [-] Data APIs:
   - [x] Room create/get
   - [x] Story update/reset round (server-side admin APIs)
@@ -84,6 +88,9 @@ Reboot StoryVote with a modern Next.js stack, migrate backend from Firebase to S
 4. [x] Next 15 route params compatibility updates.
 5. [x] Secure admin flow moved server-side.
 6. [x] Atomic vote updates via SQL RPC to prevent fast-click race conditions.
+7. [x] Theme system refresh: dark-by-default startup, dark/light toggle with duotone icons, light-mode palette tuning (buttons/messages/background/logo/hover states).
+8. [x] Removed legacy `rooms.votes` path from runtime and DB grants; round votes now sourced exclusively from `votes`.
+9. [x] Presence lifecycle hardened with keepalive API updates on heartbeat, inactivity, and page hide/unload.
 
 ## Acceptance Criteria Progress
 - [x] No Firebase dependency in runtime code.
@@ -101,6 +108,4 @@ Reboot StoryVote with a modern Next.js stack, migrate backend from Firebase to S
   - Mitigation applied: server-side admin mutations with service role; client no longer mutates admin fields.
 
 ## Next Recommended Slice
-1. [ ] Add first-class `participants` table and migrate away from `rooms.users` array.
-2. [ ] Remove legacy `rooms.votes` column after stabilization.
-3. [ ] Add CI workflow and smoke tests.
+1. [ ] Add CI workflow and smoke tests.

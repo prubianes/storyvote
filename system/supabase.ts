@@ -120,14 +120,22 @@ export async function ensureRoom(room: string, adminPasscode = ''): Promise<void
     slug: room,
     name: room,
     story: '',
-    votes: initialVoteState,
-    users: [],
     admin_passcode_hash: adminPasscodeHash,
   })
 
   if (insertError) {
     throw insertError
   }
+}
+
+export async function roomExists(room: string): Promise<boolean> {
+  const { data, error } = await getDb().from('rooms').select('slug').eq('slug', room).maybeSingle()
+
+  if (error) {
+    throw error
+  }
+
+  return Boolean(data?.slug)
 }
 
 export async function ensureActiveRound(room: string): Promise<void> {
@@ -202,19 +210,6 @@ export async function castVote(
     selectedVoteIndex:
       typeof data.selected_vote_index === 'number' ? data.selected_vote_index : null,
     votes: data.vote_counts ?? initialVoteState,
-  }
-}
-
-export async function getAllUsersFromRoom(room: string): Promise<string[]> {
-  const roomData = await getRoomState(room)
-  return roomData.users ?? []
-}
-
-export async function updateUsers(users: string[], room: string): Promise<void> {
-  const { error } = await getDb().from('rooms').update({ users }).eq('slug', room)
-
-  if (error) {
-    throw error
   }
 }
 
