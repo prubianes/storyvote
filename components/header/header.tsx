@@ -13,7 +13,7 @@ export default function Header() {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user')
+    const savedUser = sessionStorage.getItem('user') || localStorage.getItem('user')
     if (savedUser) {
       setUser(savedUser)
     }
@@ -31,16 +31,22 @@ export default function Header() {
   }
 
   const resetAll = async () => {
-    if (!room || !user) {
-      return
+    const storedRoom = sessionStorage.getItem('room') || localStorage.getItem('room')
+    const storedUser = sessionStorage.getItem('user') || localStorage.getItem('user')
+    const roomToLeave = room || storedRoom || ''
+    const userToLeave = user || storedUser || ''
+
+    if (roomToLeave && userToLeave) {
+      await markParticipantLeft(roomToLeave, userToLeave).catch(() => undefined)
+      await fetch(`/api/admin/session?room=${encodeURIComponent(roomToLeave)}`, {
+        method: 'DELETE',
+      }).catch(() => undefined)
     }
 
-    await markParticipantLeft(room, user)
-    await fetch(`/api/admin/session?room=${encodeURIComponent(room)}`, {
-      method: 'DELETE',
-    }).catch(() => undefined)
-
+    sessionStorage.removeItem('user')
+    sessionStorage.removeItem('room')
     localStorage.removeItem('user')
+    localStorage.removeItem('room')
     setUser('')
     setRoom('')
     router.push('/')
