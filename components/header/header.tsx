@@ -6,9 +6,11 @@ import { useContext, useEffect, useState } from 'react'
 
 import { RoomContext } from '../RoomContext/roomContextProvider'
 import { markParticipantLeft } from '@/system/supabase'
+import { useI18n } from '@/components/LanguageContext/languageContextProvider'
 
 export default function Header() {
   const { user, setUser, room, setRoom } = useContext(RoomContext)
+  const { language, toggleLanguage, t } = useI18n()
   const router = useRouter()
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
 
@@ -62,22 +64,35 @@ export default function Header() {
       <div className="flex items-center gap-4">
         {user ? (
           <div className="text-right">
-            <p className="text-sm text-slate-400">Hola {user}</p>
+            <p className="text-sm text-slate-400">{t('header.greeting', { user })}</p>
             <button
               type="button"
               onClick={resetAll}
               className="text-sm font-medium text-cyan-300 transition hover:text-cyan-200"
             >
-              Salir
+              {t('header.exit')}
             </button>
           </div>
         ) : null}
 
         <button
           type="button"
+          onClick={toggleLanguage}
+          className="rounded-lg border border-slate-600 px-2 py-1.5 text-xs font-semibold text-cyan-300 transition hover:border-cyan-500 hover:text-cyan-200"
+          aria-label={t('header.languageAria', {
+            lang: language === 'es' ? t('header.languageNameEn') : t('header.languageNameEs'),
+          })}
+        >
+          {language === 'es' ? 'EN' : 'ES'}
+        </button>
+
+        <button
+          type="button"
           onClick={toggleTheme}
           className="rounded-lg border border-slate-600 p-2 text-cyan-300 transition hover:border-cyan-500 hover:text-cyan-200"
-          aria-label={`Activar modo ${theme === 'dark' ? 'claro' : 'oscuro'}`}
+          aria-label={t('header.themeAria', {
+            mode: theme === 'dark' ? t('header.themeModeLight') : t('header.themeModeDark'),
+          })}
         >
           {theme === 'dark' ? (
             <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5">

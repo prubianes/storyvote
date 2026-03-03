@@ -18,6 +18,7 @@ import {
 } from '@/system/supabase'
 import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { RoomContext } from '@/components/RoomContext/roomContextProvider'
+import { useI18n } from '@/components/LanguageContext/languageContextProvider'
 
 const HEARTBEAT_INTERVAL_MS = 60_000
 const INACTIVITY_TIMEOUT_MS = 5 * 60_000
@@ -27,6 +28,7 @@ interface RoomPageClientProps {
 }
 
 export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
+  const { t } = useI18n()
   const [votes, setVotes] = useState<number[]>(initialVoteState)
   const [story, setStory] = useState('')
   const [users, setUsers] = useState<string[]>([])
@@ -222,8 +224,10 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
       <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
         <section className="rounded-2xl border border-slate-700 bg-slate-900/70 p-6 shadow-lg shadow-slate-950/30">
           <div className="mb-6">
-            <p className="text-xs uppercase tracking-wide text-cyan-300">Historia actual</p>
-            <h3 className="text-xl font-semibold text-slate-100">{story || 'Sin historia definida'}</h3>
+            <p className="text-xs uppercase tracking-wide text-cyan-300">{t('room.currentStory')}</p>
+            <h3 className="text-xl font-semibold text-slate-100">
+              {story || t('room.undefinedStory')}
+            </h3>
           </div>
 
           <div className="mb-5">

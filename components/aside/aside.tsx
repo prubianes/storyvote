@@ -1,3 +1,5 @@
+import { useI18n } from '@/components/LanguageContext/languageContextProvider'
+
 interface AsideProps {
   users: string[]
   votedUsers?: string[]
@@ -5,15 +7,16 @@ interface AsideProps {
 }
 
 export default function Aside({ users, votedUsers = [], votes }: AsideProps) {
+  const { t } = useI18n()
   const numberOfVotes = votes.reduce((partial, value) => partial + value, 0)
 
   return (
     <aside className="rounded-2xl border border-slate-700 bg-slate-900/70 p-5 shadow-lg shadow-slate-950/30">
-      <p className="text-sm text-slate-400">Votos emitidos</p>
+      <p className="text-sm text-slate-400">{t('aside.votesCast')}</p>
       <h3 className="mb-4 text-2xl font-semibold text-cyan-300">{numberOfVotes}</h3>
 
       <h4 className="mb-2 text-sm font-semibold uppercase tracking-wider text-slate-400">
-        Usuarios conectados
+        {t('aside.connectedUsers')}
       </h4>
       <ul className="space-y-2 text-sm text-slate-200">
         {(users ?? []).map((user) => (
