@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type SyntheticEvent } from 'react'
 import type { HistoryRound } from '@/system/supabase'
+import { useI18n } from '@/components/LanguageContext/languageContextProvider'
 
 const voteLabels: Array<number | '∞'> = [1, 2, 3, 5, 8, 13, 20, '∞']
 
-function getRoundDecision(voteCounts: number[] = []): string {
+function getRoundDecision(voteCounts: number[] = [], tieLabel = 'Tie'): string {
   if (!voteCounts.length) {
     return '-'
   }
@@ -21,15 +22,15 @@ function getRoundDecision(voteCounts: number[] = []): string {
     .map((entry) => entry.index)
 
   const labels = winnerIndexes.map((idx) => voteLabels[idx]).join(' / ')
-  return winnerIndexes.length > 1 ? `Empate (${labels})` : String(labels)
+  return winnerIndexes.length > 1 ? `${tieLabel} (${labels})` : String(labels)
 }
 
-function formatDateTime(value: string | null): string {
+function formatDateTime(value: string | null, locale: string): string {
   if (!value) {
     return '-'
   }
   try {
-    return new Date(value).toLocaleString('es-ES')
+    return new Date(value).toLocaleString(locale)
   } catch {
     return value
   }
@@ -59,6 +60,7 @@ export default function AdminInlinePanel({
   historyRounds,
   onRoomUpdated,
 }: AdminInlinePanelProps) {
+  const { language, locale, t } = useI18n()
   const [showAuthForm, setShowAuthForm] = useState(false)
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [isCheckingSession, setIsCheckingSession] = useState(true)
@@ -92,11 +94,11 @@ export default function AdminInlinePanel({
   }, [roomSlug])
 
   const roundStatusLabel = useMemo(
-    () => (roundActive ? 'Ronda abierta' : 'Ronda cerrada'),
-    [roundActive]
+    () => (roundActive ? t('admin.roundOpen') : t('admin.roundClosed')),
+    [roundActive, t]
   )
 
-  const handleAuth = async (e: FormEvent<HTMLFormElement>) => {
+  const handleAuth = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
     setAuthError('')
 
@@ -112,33 +114,33 @@ export default function AdminInlinePanel({
       })
 
       if (!response.ok) {
-        const payload = (await response.json().catch(() => ({ error: 'Passcode inválido.' }))) as {
+        const payload = (await response.json().catch(() => ({ error: t('admin.invalidPasscode') }))) as {
           error?: string
         }
-        setAuthError(payload.error ?? 'Passcode inválido.')
+        setAuthError(payload.error ?? t('admin.invalidPasscode'))
         return
       }
 
       setIsAuthorized(true)
       await onRoomUpdated()
     } catch {
-      setAuthError('No fue posible validar el passcode.')
+      setAuthError(t('admin.passcodeValidationError'))
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleStoryForm = async (e: FormEvent<HTMLFormElement>) => {
+  const handleStoryForm = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     if (!roundActive) {
-      setAuthError('Solo puedes actualizar la historia con la ronda abierta.')
+      setAuthError(t('admin.storyOnlyWhenOpen'))
       return
     }
 
     const story = storyDraft.trim()
     if (!story) {
-      setAuthError('La historia no puede estar vacía.')
+      setAuthError(t('admin.storyEmpty'))
       return
     }
 
@@ -153,11 +155,11 @@ export default function AdminInlinePanel({
 
       if (response.status === 401) {
         setIsAuthorized(false)
-        setAuthError('La sesión de admin expiró. Ingresa nuevamente.')
+        setAuthError(t('admin.sessionExpired'))
         return
       }
       if (!response.ok) {
-        setAuthError('No fue posible actualizar la historia.')
+        setAuthError(t('admin.storyUpdateFailed'))
         return
       }
 
@@ -179,9 +181,9 @@ export default function AdminInlinePanel({
 
       if (response.status === 401) {
         setIsAuthorized(false)
-        setAuthError('La sesión de admin expiró. Ingresa nuevamente.')
+        setAuthError(t('admin.sessionExpired'))
       } else if (!response.ok) {
-        setAuthError('No fue posible resetear la votación.')
+        setAuthError(t('admin.resetFailed'))
       } else {
         await onRoomUpdated()
       }
@@ -192,7 +194,7 @@ export default function AdminInlinePanel({
 
   const handleToggleRound = async () => {
     if (!roundActive && !storyDraft.trim()) {
-      setAuthError('Debes ingresar una historia antes de abrir una nueva ronda.')
+      setAuthError(t('admin.storyRequiredToOpen'))
       return
     }
 
@@ -212,11 +214,9 @@ export default function AdminInlinePanel({
 
       if (response.status === 401) {
         setIsAuthorized(false)
-        setAuthError('La sesión de admin expiró. Ingresa nuevamente.')
+        setAuthError(t('admin.sessionExpired'))
       } else if (!response.ok) {
-        setAuthError(
-          roundActive ? 'No fue posible cerrar la ronda.' : 'No fue posible abrir una nueva ronda.'
-        )
+        setAuthError(roundActive ? t('admin.closeRoundFailed') : t('admin.openRoundFailed'))
       } else {
         if (roundActive) {
           setStoryDraft('')
@@ -236,7 +236,7 @@ export default function AdminInlinePanel({
     setIsExporting(true)
     setAuthError('')
     try {
-      const exportedAt = new Date().toLocaleString('es-ES')
+      const exportedAt = new Date().toLocaleString(locale)
       const rows = historyRounds
         .map((round, index) => {
           const voteCounts = round.vote_counts ?? []
@@ -251,7 +251,7 @@ export default function AdminInlinePanel({
                 <div class="vote-row">
                   <span class="vote-label">${escapeHtml(String(label))}</span>
                   <span class="bar-svg-wrap">
-                    <svg width="${barMaxWidth}" height="10" viewBox="0 0 ${barMaxWidth} 10" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${escapeHtml(String(label))} ${count} votos">
+                    <svg width="${barMaxWidth}" height="10" viewBox="0 0 ${barMaxWidth} 10" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${escapeHtml(String(label))} ${count}">
                       <rect x="0.5" y="0.5" width="${barMaxWidth - 1}" height="9" fill="white" stroke="#9ca3af" />
                       <rect x="1" y="1" width="${barWidth}" height="8" fill="#0f766e" />
                     </svg>
@@ -265,11 +265,11 @@ export default function AdminInlinePanel({
           return `
             <tr>
               <td>${historyRounds.length - index}</td>
-              <td>${escapeHtml(round.story || 'Sin historia')}</td>
-              <td>${escapeHtml(getRoundDecision(round.vote_counts))}</td>
+              <td>${escapeHtml(round.story || t('history.noStory'))}</td>
+              <td>${escapeHtml(getRoundDecision(round.vote_counts, t('history.tie')))}</td>
               <td>${escapeHtml(String(round.total_votes ?? 0))}</td>
-              <td>${escapeHtml(formatDateTime(round.created_at))}</td>
-              <td>${escapeHtml(formatDateTime(round.closed_at))}</td>
+              <td>${escapeHtml(formatDateTime(round.created_at, locale))}</td>
+              <td>${escapeHtml(formatDateTime(round.closed_at, locale))}</td>
               <td><div class="vote-chart">${distributionChart}</div></td>
             </tr>
           `
@@ -278,10 +278,10 @@ export default function AdminInlinePanel({
 
       const html = `
         <!doctype html>
-        <html lang="es">
+        <html lang="${language}">
           <head>
             <meta charset="utf-8" />
-            <title>Historial de votaciones - ${escapeHtml(roomSlug)}</title>
+            <title>${escapeHtml(t('admin.pdfDocumentTitle', { room: roomSlug }))}</title>
             <style>
               body { font-family: Arial, sans-serif; margin: 20px; color: #111827; }
               h1 { margin: 0 0 8px; font-size: 20px; }
@@ -302,20 +302,20 @@ export default function AdminInlinePanel({
             </style>
           </head>
           <body>
-            <h1>Historial de votaciones</h1>
-            <p>Sala: ${escapeHtml(roomSlug)}</p>
-            <p>Exportado: ${escapeHtml(exportedAt)}</p>
-            <p>Total de rondas: ${historyRounds.length}</p>
+            <h1>${escapeHtml(t('admin.pdfMainTitle'))}</h1>
+            <p>${escapeHtml(t('admin.pdfRoom', { room: roomSlug }))}</p>
+            <p>${escapeHtml(t('admin.pdfExportedAt', { date: exportedAt }))}</p>
+            <p>${escapeHtml(t('admin.pdfTotalRounds', { count: historyRounds.length }))}</p>
             <table>
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>Historia</th>
-                  <th>Puntaje</th>
-                  <th>Total votos</th>
-                  <th>Inicio</th>
-                  <th>Cierre</th>
-                  <th>Distribución</th>
+                  <th>${escapeHtml(t('admin.pdfColRound'))}</th>
+                  <th>${escapeHtml(t('admin.pdfColStory'))}</th>
+                  <th>${escapeHtml(t('admin.pdfColScore'))}</th>
+                  <th>${escapeHtml(t('admin.pdfColTotalVotes'))}</th>
+                  <th>${escapeHtml(t('admin.pdfColStart'))}</th>
+                  <th>${escapeHtml(t('admin.pdfColClose'))}</th>
+                  <th>${escapeHtml(t('admin.pdfColDistribution'))}</th>
                 </tr>
               </thead>
               <tbody>${rows}</tbody>
@@ -326,7 +326,7 @@ export default function AdminInlinePanel({
 
       const printWindow = window.open('', '_blank')
       if (!printWindow) {
-        setAuthError('No fue posible abrir la ventana de exportación.')
+        setAuthError(t('admin.exportWindowFailed'))
         return
       }
 
@@ -365,7 +365,7 @@ export default function AdminInlinePanel({
             onClick={() => setShowAuthForm(true)}
             className="rounded-lg border border-slate-600 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-cyan-500 hover:text-cyan-300"
           >
-            Modo admin
+            {t('admin.modeButton')}
           </button>
         </div>
       )
@@ -373,8 +373,8 @@ export default function AdminInlinePanel({
 
     return (
       <section className="rounded-xl border border-slate-700 bg-slate-900/60 p-4">
-        <p className="text-sm font-semibold text-slate-100">Modo Admin</p>
-        <p className="mt-1 text-xs text-slate-400">Ingresa passcode para habilitar controles.</p>
+        <p className="text-sm font-semibold text-slate-100">{t('admin.modeTitle')}</p>
+        <p className="mt-1 text-xs text-slate-400">{t('admin.modeDescription')}</p>
         <form onSubmit={handleAuth} className="mt-3 flex flex-wrap items-center gap-2">
           <input
             type="password"
@@ -388,7 +388,7 @@ export default function AdminInlinePanel({
             disabled={isSubmitting}
             className="rounded-lg bg-cyan-500 px-3 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isSubmitting ? 'Validando...' : 'Entrar'}
+            {isSubmitting ? t('admin.entering') : t('admin.enter')}
           </button>
           <button
             type="button"
@@ -398,7 +398,7 @@ export default function AdminInlinePanel({
             }}
             className="rounded-lg border border-slate-600 px-3 py-2 text-sm font-semibold text-slate-300 transition hover:border-slate-400 hover:text-slate-100"
           >
-            Cancelar
+            {t('admin.cancel')}
           </button>
         </form>
         {authError ? <p className="mt-2 text-xs text-rose-300">{authError}</p> : null}
@@ -409,7 +409,7 @@ export default function AdminInlinePanel({
   return (
     <section className="rounded-xl border border-cyan-700/50 bg-slate-900/70 p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-cyan-200">Panel Admin</p>
+        <p className="text-sm font-semibold text-cyan-200">{t('admin.panelTitle')}</p>
         <span
           className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${
             roundActive
@@ -428,7 +428,7 @@ export default function AdminInlinePanel({
           name="story"
           value={storyDraft}
           onChange={(e) => setStoryDraft(e.target.value)}
-          placeholder="Historia de la ronda"
+          placeholder={t('admin.storyPlaceholder')}
           className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
         />
       </form>
@@ -446,7 +446,7 @@ export default function AdminInlinePanel({
               : 'border-emerald-500/50 text-emerald-300 hover:border-emerald-400 hover:text-emerald-200'
           } disabled:cursor-not-allowed disabled:opacity-50`}
         >
-          {roundActive ? 'Cerrar ronda' : 'Abrir ronda'}
+          {roundActive ? t('admin.closeRound') : t('admin.openRound')}
         </button>
 
         <button
@@ -455,7 +455,7 @@ export default function AdminInlinePanel({
           disabled={isSubmitting || !roundActive}
           className="rounded-lg bg-cyan-500 px-3 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isSubmitting ? 'Guardando...' : 'Actualizar historia'}
+          {isSubmitting ? t('admin.saving') : t('admin.updateStory')}
         </button>
 
         <button
@@ -464,7 +464,7 @@ export default function AdminInlinePanel({
           disabled={isSubmitting || !roundActive}
           className="rounded-lg border border-rose-500/50 px-3 py-2 text-sm font-semibold text-rose-300 transition hover:border-rose-400 hover:text-rose-200 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Resetear votos
+          {t('admin.resetVotes')}
         </button>
 
         <button
@@ -473,7 +473,7 @@ export default function AdminInlinePanel({
           disabled={isExporting || !historyRounds.length}
           className="rounded-lg border border-indigo-500/50 px-3 py-2 text-sm font-semibold text-indigo-300 transition hover:border-indigo-400 hover:text-indigo-200 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isExporting ? 'Exportando...' : 'Exportar historial (PDF)'}
+          {isExporting ? t('admin.exporting') : t('admin.exportHistoryPdf')}
         </button>
       </div>
     </section>

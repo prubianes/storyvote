@@ -1,4 +1,5 @@
 import type { HistoryRound } from '@/system/supabase'
+import { useI18n } from '@/components/LanguageContext/languageContextProvider'
 
 const voteLabels: Array<number | '∞'> = [1, 2, 3, 5, 8, 13, 20, '∞']
 const voteColors = [
@@ -12,7 +13,7 @@ const voteColors = [
   'bg-rose-400',
 ]
 
-function getRoundDecision(voteCounts: number[] = []): string {
+function getRoundDecision(voteCounts: number[] = [], tieLabel = 'Tie'): string {
   if (!voteCounts.length) {
     return '-'
   }
@@ -28,15 +29,15 @@ function getRoundDecision(voteCounts: number[] = []): string {
     .map((entry) => entry.index)
 
   const labels = winnerIndexes.map((idx) => voteLabels[idx]).join(' / ')
-  return winnerIndexes.length > 1 ? `Empate (${labels})` : String(labels)
+  return winnerIndexes.length > 1 ? `${tieLabel} (${labels})` : String(labels)
 }
 
-function formatDateTime(value: string | null): string {
+function formatDateTime(value: string | null, locale: string): string {
   if (!value) {
     return '-'
   }
   try {
-    return new Date(value).toLocaleString('es-ES')
+    return new Date(value).toLocaleString(locale)
   } catch {
     return value
   }
@@ -47,18 +48,20 @@ interface RoundHistoryProps {
 }
 
 export default function RoundHistory({ rounds }: RoundHistoryProps) {
+  const { t, locale } = useI18n()
+
   if (!rounds.length) {
     return (
       <section className="rounded-2xl border border-slate-700 bg-slate-900/70 p-6 shadow-lg shadow-slate-950/30">
-        <h4 className="text-lg font-semibold text-slate-100">Historial de rondas</h4>
-        <p className="mt-2 text-sm text-slate-400">Aún no hay rondas cerradas.</p>
+        <h4 className="text-lg font-semibold text-slate-100">{t('history.title')}</h4>
+        <p className="mt-2 text-sm text-slate-400">{t('history.empty')}</p>
       </section>
     )
   }
 
   return (
     <section className="rounded-2xl border border-slate-700 bg-slate-900/70 p-6 shadow-lg shadow-slate-950/30">
-      <h4 className="text-lg font-semibold text-slate-100">Historial de rondas</h4>
+      <h4 className="text-lg font-semibold text-slate-100">{t('history.title')}</h4>
       <div className="mt-4 space-y-4">
         {rounds.map((round, index) => {
           const voteCounts = round.vote_counts ?? []
@@ -72,15 +75,23 @@ export default function RoundHistory({ rounds }: RoundHistoryProps) {
             <article key={round.id} className="rounded-xl border border-slate-700/70 bg-slate-950/50 p-4">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <h5 className="font-semibold text-slate-100">
-                  Ronda #{rounds.length - index} · {round.story || 'Sin historia'}
+                  {t('history.roundTitle', {
+                    number: rounds.length - index,
+                    story: round.story || t('history.noStory'),
+                  })}
                 </h5>
-                <span className="text-xs text-slate-400">Votos: {round.total_votes ?? 0}</span>
+                <span className="text-xs text-slate-400">
+                  {t('history.votes', { count: round.total_votes ?? 0 })}
+                </span>
               </div>
               <p className="mb-1 text-sm font-semibold text-cyan-300">
-                Puntaje de ronda: {getRoundDecision(round.vote_counts)}
+                {t('history.roundScore', {
+                  decision: getRoundDecision(round.vote_counts, t('history.tie')),
+                })}
               </p>
               <p className="text-xs text-slate-400">
-                Inicio: {formatDateTime(round.created_at)} · Cierre: {formatDateTime(round.closed_at)}
+                {t('history.start')}: {formatDateTime(round.created_at, locale)} · {t('history.close')}:{' '}
+                {formatDateTime(round.closed_at, locale)}
               </p>
 
               <div className="mt-4">
@@ -105,7 +116,7 @@ export default function RoundHistory({ rounds }: RoundHistoryProps) {
 
                 <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {ranked.length === 0 ? (
-                    <p className="text-xs text-slate-500">Sin votos registrados.</p>
+                    <p className="text-xs text-slate-500">{t('history.noVotes')}</p>
                   ) : (
                     ranked.map(({ voteIndex, count }) => (
                       <div
@@ -114,7 +125,7 @@ export default function RoundHistory({ rounds }: RoundHistoryProps) {
                       >
                         <div className="flex items-center gap-2">
                           <span className={`h-2.5 w-2.5 rounded-full ${voteColors[voteIndex]}`} />
-                          <span>Voto: {voteLabels[voteIndex]}</span>
+                          <span>{t('history.voteLabel', { value: voteLabels[voteIndex] })}</span>
                         </div>
                         <span>
                           {count} ({Math.round((count / totalVotes) * 100)}%)

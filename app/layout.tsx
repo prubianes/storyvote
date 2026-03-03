@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import './globals.css'
 import Header from '@/components/header/header'
 import UserContextProvider from '@/components/RoomContext/roomContextProvider'
+import LanguageContextProvider from '@/components/LanguageContext/languageContextProvider'
 
 export const metadata = {
   title: 'StoryVote',
@@ -17,10 +18,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="es">
       <body className="min-h-screen bg-slate-950 text-slate-100 antialiased">
-        <UserContextProvider>
-          <Header />
-          {children}
-        </UserContextProvider>
+        <LanguageContextProvider>
+          <UserContextProvider>
+            <Header />
+            {children}
+          </UserContextProvider>
+        </LanguageContextProvider>
       </body>
     </html>
   )
