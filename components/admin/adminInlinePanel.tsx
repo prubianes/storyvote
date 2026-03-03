@@ -86,6 +86,11 @@ export default function AdminInlinePanel({
   const handleStoryForm = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
+    if (!roundActive) {
+      setAuthError('Solo puedes actualizar la historia con la ronda abierta.')
+      return
+    }
+
     const story = storyDraft.trim()
     if (!story) {
       setAuthError('La historia no puede estar vacía.')
@@ -278,7 +283,7 @@ export default function AdminInlinePanel({
         <button
           type="submit"
           form="inline-story-form"
-          disabled={isSubmitting}
+          disabled={isSubmitting || !roundActive}
           className="rounded-lg bg-cyan-500 px-3 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? 'Guardando...' : 'Actualizar historia'}
