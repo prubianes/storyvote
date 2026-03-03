@@ -231,6 +231,7 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
               roomSlug={roomSlug}
               roundActive={roundActive}
               currentStory={story}
+              historyRounds={history}
               onRoomUpdated={() => syncRoomAndHistory(roomSlug)}
             />
           </div>

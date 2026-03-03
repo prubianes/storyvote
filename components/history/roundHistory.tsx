@@ -77,7 +77,7 @@ export default function RoundHistory({ rounds }: RoundHistoryProps) {
                 <span className="text-xs text-slate-400">Votos: {round.total_votes ?? 0}</span>
               </div>
               <p className="mb-1 text-sm font-semibold text-cyan-300">
-                Valor de ronda: {getRoundDecision(round.vote_counts)}
+                Puntaje de ronda: {getRoundDecision(round.vote_counts)}
               </p>
               <p className="text-xs text-slate-400">
                 Inicio: {formatDateTime(round.created_at)} · Cierre: {formatDateTime(round.closed_at)}
@@ -114,7 +114,7 @@ export default function RoundHistory({ rounds }: RoundHistoryProps) {
                       >
                         <div className="flex items-center gap-2">
                           <span className={`h-2.5 w-2.5 rounded-full ${voteColors[voteIndex]}`} />
-                          <span>Valor {voteLabels[voteIndex]}</span>
+                          <span>Voto: {voteLabels[voteIndex]}</span>
                         </div>
                         <span>
                           {count} ({Math.round((count / totalVotes) * 100)}%)
