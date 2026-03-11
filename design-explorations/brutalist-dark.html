@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>StoryVote / Brutalist Broadcast Dark</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;700&family=Instrument+Sans:wght@400;500;600&display=swap");
+
+      :root {
+        --bg: #0b0f12;
+        --ink: #f4f0e8;
+        --paper: #12181d;
+        --paper-2: #182128;
+        --red: #ff5a3c;
+        --cyan: #65d8e6;
+        --blue: #5c7cff;
+        --mint: #6ce0b3;
+        --line: #f4f0e8;
+        --muted: rgba(244, 240, 232, 0.68);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          linear-gradient(135deg, rgba(244, 240, 232, 0.04) 25%, transparent 25%) -20px 0 / 40px 40px,
+          linear-gradient(225deg, rgba(244, 240, 232, 0.04) 25%, transparent 25%) -20px 0 / 40px 40px,
+          linear-gradient(315deg, rgba(244, 240, 232, 0.04) 25%, transparent 25%) 0 0 / 40px 40px,
+          linear-gradient(45deg, rgba(244, 240, 232, 0.04) 25%, transparent 25%) 0 0 / 40px 40px,
+          radial-gradient(circle at 12% 18%, rgba(255, 90, 60, 0.18), transparent 22%),
+          radial-gradient(circle at 88% 12%, rgba(101, 216, 230, 0.16), transparent 26%),
+          linear-gradient(180deg, #060809, #0b0f12 36%, #11171c);
+        color: var(--ink);
+        font-family: "Instrument Sans", sans-serif;
+      }
+
+      .wrap {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 20px 18px 50px;
+      }
+
+      .banner {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 18px;
+      }
+
+      .slab {
+        position: relative;
+        border: 3px solid var(--line);
+        background: var(--paper);
+        box-shadow:
+          10px 10px 0 rgba(82, 82, 82, 0.72),
+          16px 16px 32px rgba(0, 0, 0, 0.24);
+        opacity: 0;
+        transform: translateY(20px);
+        animation: slam 0.55s steps(5) forwards;
+      }
+
+      .hero {
+        padding: 28px;
+        background:
+          linear-gradient(160deg, rgba(255, 90, 60, 0.1), transparent 40%),
+          var(--paper);
+      }
+
+      .stack {
+        display: grid;
+        gap: 18px;
+      }
+
+      .micro {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--muted);
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        font-family: "Archivo Black", sans-serif;
+        text-transform: uppercase;
+        line-height: 0.9;
+        letter-spacing: -0.05em;
+      }
+
+      h1 {
+        margin-top: 16px;
+        font-size: clamp(64px, 9vw, 132px);
+      }
+
+      p {
+        line-height: 1.55;
+      }
+
+      .hero p {
+        max-width: 620px;
+        font-size: 18px;
+        color: var(--muted);
+      }
+
+      .ticker {
+        display: inline-flex;
+        margin-top: 24px;
+        padding: 14px 18px;
+        background: var(--blue);
+        color: white;
+        border: 3px solid var(--line);
+        font-family: "IBM Plex Mono", monospace;
+        font-weight: 700;
+      }
+
+      .block-red {
+        background: var(--red);
+        color: #fff5ef;
+      }
+
+      .block-cyan {
+        background: var(--cyan);
+        color: #071316;
+      }
+
+      .metric {
+        padding: 24px;
+        min-height: 190px;
+        transform: rotate(-1deg);
+        animation-delay: 120ms;
+      }
+
+      .metric strong {
+        display: block;
+        margin-top: 18px;
+        font-family: "Archivo Black", sans-serif;
+        font-size: 88px;
+        line-height: 0.82;
+      }
+
+      .room {
+        display: grid;
+        grid-template-columns: 1fr 290px;
+        gap: 18px;
+        margin-top: 20px;
+      }
+
+      .stage {
+        padding: 22px;
+        animation-delay: 200ms;
+      }
+
+      .story {
+        display: grid;
+        gap: 14px;
+        padding: 18px;
+        border: 3px solid var(--line);
+        background: var(--paper-2);
+      }
+
+      .story-name {
+        font-family: "Archivo Black", sans-serif;
+        text-transform: uppercase;
+        font-size: clamp(30px, 5vw, 64px);
+        line-height: 0.92;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .actions button,
+      .panel button {
+        border: 3px solid var(--line);
+        background: var(--paper);
+        color: var(--ink);
+        padding: 14px 16px;
+        font-family: "IBM Plex Mono", monospace;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+
+      .actions button:first-child {
+        background: var(--mint);
+        color: #05120d;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .cards button {
+        min-height: 104px;
+        font-family: "Archivo Black", sans-serif;
+        font-size: 46px;
+        color: var(--ink);
+        background: var(--paper-2);
+        transition: transform 120ms steps(2), background 120ms steps(2);
+      }
+
+      .cards button:hover {
+        transform: translate(-4px, -4px);
+        background: var(--red);
+        box-shadow:
+          4px 4px 0 rgba(82, 82, 82, 0.72),
+          8px 8px 18px rgba(0, 0, 0, 0.18);
+      }
+
+      .panel {
+        padding: 18px;
+        animation-delay: 320ms;
+      }
+
+      .count {
+        margin: 14px 0 20px;
+        font-family: "Archivo Black", sans-serif;
+        font-size: 96px;
+        line-height: 0.84;
+        color: var(--cyan);
+      }
+
+      .person {
+        display: flex;
+        justify-content: space-between;
+        padding: 13px 12px;
+        border-top: 3px solid var(--line);
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      .history {
+        margin-top: 20px;
+        padding: 22px;
+        animation-delay: 420ms;
+      }
+
+      .history-list {
+        display: grid;
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .history-item {
+        display: grid;
+        grid-template-columns: 150px 1fr 140px;
+        gap: 16px;
+        align-items: center;
+        border: 3px solid var(--line);
+        padding: 16px;
+        background: var(--paper-2);
+      }
+
+      .meter {
+        height: 16px;
+        border: 3px solid var(--line);
+        background:
+          linear-gradient(90deg, var(--red) 0 34%, var(--cyan) 34% 68%, var(--blue) 68% 100%);
+      }
+
+      @keyframes slam {
+        0% {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+
+        80% {
+          opacity: 1;
+          transform: translateY(-6px);
+        }
+
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 1040px) {
+        .banner,
+        .room {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .cards,
+        .history-item {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .history-item > :nth-child(2) {
+          grid-column: 1 / -1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <section class="banner">
+        <article class="slab hero">
+          <div class="micro">Option / brutalist broadcast / dark mode</div>
+          <h1>Vote loud. Decide fast.</h1>
+          <p>
+            Same brutalist structure, but rebuilt for dark mode with cold cyan, alert red, deep
+            blue, and mint status accents. No yellow anywhere in the palette.
+          </p>
+          <div class="ticker">Room / growth-pricing / 04 connected / live round</div>
+        </article>
+
+        <div class="stack">
+          <section class="slab metric block-red">
+            <div class="micro" style="color: rgba(255,255,255,0.8);">Votes cast</div>
+            <strong>24</strong>
+            <div>Still loud, but less poster-paper and more night control room.</div>
+          </section>
+          <section class="slab metric block-cyan">
+            <div class="micro" style="color: rgba(7,19,22,0.7);">Admin note</div>
+            <h3 style="margin-top: 14px; font-size: 38px;">Export. Reset. Repeat.</h3>
+          </section>
+        </div>
+      </section>
+
+      <section class="room">
+        <article class="slab stage">
+          <div class="story">
+            <div class="micro">Current story</div>
+            <div class="story-name">Prevent duplicate promo redemption on refreshed session.</div>
+            <div class="actions">
+              <button>Round open</button>
+              <button>Close</button>
+              <button>Update</button>
+              <button>PDF</button>
+            </div>
+          </div>
+
+          <div class="micro" style="margin: 18px 0 10px;">Vote board</div>
+          <div class="cards">
+            <button>1</button>
+            <button>2</button>
+            <button>3</button>
+            <button>5</button>
+            <button>8</button>
+            <button>13</button>
+            <button>20</button>
+            <button>∞</button>
+          </div>
+        </article>
+
+        <aside class="slab panel">
+          <div class="micro">Connected users</div>
+          <div class="count">04</div>
+          <div class="person"><span>Julia</span><span>✓</span></div>
+          <div class="person"><span>Marti</span><span>✓</span></div>
+          <div class="person"><span>Teo</span><span>·</span></div>
+          <div class="person"><span>Fede</span><span>✓</span></div>
+        </aside>
+      </section>
+
+      <section class="slab history">
+        <div class="micro">Round history</div>
+        <h2 style="margin-top: 10px; font-size: clamp(34px, 6vw, 70px);">Archived decisions</h2>
+        <div class="history-list">
+          <article class="history-item">
+            <div><strong>Round 06</strong><br /><span class="micro">12 votes</span></div>
+            <div>
+              Duplicate promo redemption on refreshed session
+              <div class="meter" style="margin-top: 10px;"></div>
+            </div>
+            <div><strong>Decision / 8</strong></div>
+          </article>
+
+          <article class="history-item">
+            <div><strong>Round 05</strong><br /><span class="micro">11 votes</span></div>
+            <div>
+              Checkout error after gift card removal
+              <div class="meter" style="margin-top: 10px; background:
+                linear-gradient(90deg, var(--cyan) 0 46%, var(--blue) 46% 74%, var(--red) 74% 100%);"></div>
+            </div>
+            <div><strong>Decision / 5</strong></div>
+          </article>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>StoryVote / Modern Atelier</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap");
+
+      :root {
+        --bg: #f4ecde;
+        --ink: #26190f;
+        --muted: rgba(38, 25, 15, 0.68);
+        --line: rgba(38, 25, 15, 0.14);
+        --panel: rgba(255, 249, 240, 0.72);
+        --accent: #a2512b;
+        --accent-soft: rgba(162, 81, 43, 0.12);
+        --accent-2: #2e7e72;
+        --shadow: 0 28px 80px rgba(85, 57, 34, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Manrope", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 10% 14%, rgba(162, 81, 43, 0.12), transparent 24%),
+          radial-gradient(circle at 82% 10%, rgba(46, 126, 114, 0.14), transparent 22%),
+          linear-gradient(180deg, #f8f0e6 0%, #efe4d4 52%, #e9dece 100%);
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          radial-gradient(rgba(38, 25, 15, 0.07) 0.7px, transparent 0.7px);
+        background-size: 9px 9px;
+        opacity: 0.2;
+      }
+
+      .shell {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 32px 22px 60px;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 24px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .brand-mark {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px 8px 14px 8px;
+        background:
+          linear-gradient(145deg, rgba(162, 81, 43, 0.2), rgba(46, 126, 114, 0.26)),
+          #fef8f1;
+        border: 1px solid rgba(38, 25, 15, 0.12);
+        box-shadow: var(--shadow);
+      }
+
+      .brand-copy span {
+        display: block;
+      }
+
+      .micro {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.24em;
+        color: var(--muted);
+      }
+
+      .title {
+        font-family: "Instrument Serif", serif;
+        font-size: 34px;
+        letter-spacing: -0.04em;
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 12px;
+      }
+
+      .toolbar button {
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.54);
+        color: var(--ink);
+        border-radius: 999px;
+        padding: 12px 16px;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 22px;
+      }
+
+      .panel {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 32px;
+        background: var(--panel);
+        backdrop-filter: blur(12px);
+        box-shadow: var(--shadow);
+        opacity: 0;
+        transform: translateY(22px);
+        animation: rise 0.8s cubic-bezier(.2,.8,.2,1) forwards;
+      }
+
+      .panel::before {
+        content: "";
+        position: absolute;
+        inset: auto -10% -18% auto;
+        width: 240px;
+        height: 240px;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(162, 81, 43, 0.1), transparent 70%);
+      }
+
+      .hero-left {
+        padding: 44px;
+      }
+
+      .hero-right {
+        padding: 24px;
+        animation-delay: 160ms;
+      }
+
+      h1 {
+        margin: 16px 0 12px;
+        font-family: "Instrument Serif", serif;
+        font-size: clamp(52px, 8vw, 96px);
+        line-height: 0.9;
+        letter-spacing: -0.06em;
+      }
+
+      .lede {
+        max-width: 560px;
+        font-size: 18px;
+        line-height: 1.72;
+        color: var(--muted);
+      }
+
+      .form {
+        display: grid;
+        gap: 14px;
+        margin-top: 28px;
+        max-width: 520px;
+      }
+
+      label {
+        display: grid;
+        gap: 8px;
+      }
+
+      label span {
+        font-size: 12px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      input {
+        width: 100%;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 18px;
+        padding: 16px 18px;
+        color: var(--ink);
+      }
+
+      .cta {
+        margin-top: 8px;
+        border: 0;
+        border-radius: 999px;
+        padding: 17px 24px;
+        background: linear-gradient(135deg, #bb6939, #97502d);
+        color: #fff7ee;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-weight: 700;
+        box-shadow: 0 18px 30px rgba(162, 81, 43, 0.22);
+      }
+
+      .orbit {
+        display: grid;
+        gap: 16px;
+        height: 100%;
+      }
+
+      .tile {
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.54);
+        padding: 20px;
+      }
+
+      .tile.large {
+        min-height: 220px;
+        transform: rotate(-2deg);
+      }
+
+      .tile.metric {
+        margin-left: 18%;
+        transform: translateY(-12px);
+      }
+
+      .tile h3,
+      .story-card h2,
+      .history h2,
+      .aside h2 {
+        margin: 0;
+        font-family: "Instrument Serif", serif;
+        font-size: 36px;
+        letter-spacing: -0.05em;
+      }
+
+      .metric-value {
+        margin: 16px 0 8px;
+        font-family: "Instrument Serif", serif;
+        font-size: 84px;
+        line-height: 0.84;
+        color: var(--accent);
+      }
+
+      .main-grid {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 22px;
+        margin-top: 22px;
+      }
+
+      .story-card {
+        padding: 28px;
+        animation-delay: 260ms;
+      }
+
+      .story-block {
+        display: grid;
+        gap: 18px;
+        padding: 22px;
+        border: 1px solid var(--line);
+        border-radius: 26px;
+        background: rgba(255, 255, 255, 0.45);
+      }
+
+      .story-name {
+        font-family: "Instrument Serif", serif;
+        font-size: clamp(34px, 5vw, 62px);
+        line-height: 0.93;
+      }
+
+      .admin-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .chip {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.6);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 12px;
+      }
+
+      .chip.primary {
+        background: var(--accent-soft);
+        border-color: rgba(162, 81, 43, 0.28);
+        color: var(--accent);
+      }
+
+      .vote-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .vote-card {
+        position: relative;
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        min-height: 110px;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.5);
+        font-family: "Instrument Serif", serif;
+        font-size: 44px;
+        transform: rotate(var(--r));
+        transition: transform 180ms ease, background 180ms ease;
+      }
+
+      .vote-card:hover {
+        transform: translateY(-5px) rotate(var(--r));
+        background: rgba(162, 81, 43, 0.12);
+      }
+
+      .vote-card:nth-child(1) { --r: -2deg; }
+      .vote-card:nth-child(2) { --r: 1.2deg; }
+      .vote-card:nth-child(3) { --r: -1deg; }
+      .vote-card:nth-child(4) { --r: 2.1deg; }
+      .vote-card:nth-child(5) { --r: -1.4deg; }
+      .vote-card:nth-child(6) { --r: 1.5deg; }
+      .vote-card:nth-child(7) { --r: -2.4deg; }
+      .vote-card:nth-child(8) { --r: 0.8deg; }
+
+      .aside {
+        padding: 24px;
+        animation-delay: 320ms;
+      }
+
+      .list {
+        display: grid;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 15px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.52);
+        border: 1px solid var(--line);
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--accent-2);
+        box-shadow: 0 0 0 0 rgba(46, 126, 114, 0.4);
+        animation: pulse 1.8s infinite;
+      }
+
+      .history {
+        margin-top: 22px;
+        padding: 28px;
+        animation-delay: 420ms;
+      }
+
+      .history-grid {
+        display: grid;
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .history-row {
+        display: grid;
+        grid-template-columns: 120px 1fr 120px;
+        gap: 16px;
+        align-items: center;
+        padding: 16px 18px;
+        border-radius: 22px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.48);
+      }
+
+      .bar {
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(38, 25, 15, 0.08);
+        overflow: hidden;
+      }
+
+      .bar span {
+        display: block;
+        height: 100%;
+        width: var(--w);
+        background: linear-gradient(90deg, var(--accent-2), var(--accent));
+      }
+
+      @keyframes rise {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes pulse {
+        70% {
+          box-shadow: 0 0 0 12px rgba(46, 126, 114, 0);
+        }
+      }
+
+      @media (max-width: 1024px) {
+        .hero,
+        .main-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .tile.metric {
+          margin-left: 0;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .vote-grid,
+        .history-row {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .history-row > :nth-child(2) {
+          grid-column: 1 / -1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header>
+        <div class="brand">
+          <div class="brand-mark"></div>
+          <div class="brand-copy">
+            <span class="micro">Planning ritual</span>
+            <span class="title">StoryVote</span>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button>EN</button>
+          <button>Light</button>
+        </div>
+      </header>
+
+      <section class="hero">
+        <article class="panel hero-left">
+          <div class="micro">Realtime estimation / editorial layout</div>
+          <h1>Planning poker with presence, memory, and drama.</h1>
+          <p class="lede">
+            This direction treats the product like a crafted studio tool: softer light, cultured
+            typography, warm metallic color, and room for the interface to breathe.
+          </p>
+
+          <form class="form">
+            <label>
+              <span>Name</span>
+              <input placeholder="Micaela Ruiz" />
+            </label>
+            <label>
+              <span>Room</span>
+              <input placeholder="checkout-redesign" />
+            </label>
+            <label>
+              <span>Admin passcode</span>
+              <input placeholder="Optional" />
+            </label>
+            <button class="cta" type="button">Enter the room</button>
+          </form>
+        </article>
+
+        <aside class="panel hero-right">
+          <div class="orbit">
+            <section class="tile large">
+              <div class="micro">Current story</div>
+              <h3>Edge-case review for discount stacking.</h3>
+              <p style="margin-top: 12px; color: var(--muted); line-height: 1.65;">
+                The hero module overlaps into the room entry moment so the product feels alive
+                before you even join.
+              </p>
+            </section>
+
+            <section class="tile metric">
+              <div class="micro">Votes cast</div>
+              <div class="metric-value">18</div>
+              <div style="color: var(--muted);">4 active estimators / 1 admin in control</div>
+            </section>
+          </div>
+        </aside>
+      </section>
+
+      <section class="main-grid">
+        <article class="panel story-card">
+          <div class="story-block">
+            <div class="micro">Current story</div>
+            <div class="story-name">Replace stale cart state after checkout return.</div>
+            <div class="admin-row">
+              <button class="chip primary">Round open</button>
+              <button class="chip">Close round</button>
+              <button class="chip">Update story</button>
+              <button class="chip">Export PDF</button>
+            </div>
+          </div>
+
+          <div class="micro" style="margin: 28px 0 14px;">Vote deck</div>
+          <div class="vote-grid">
+            <button class="vote-card">1</button>
+            <button class="vote-card">2</button>
+            <button class="vote-card">3</button>
+            <button class="vote-card">5</button>
+            <button class="vote-card">8</button>
+            <button class="vote-card">13</button>
+            <button class="vote-card">20</button>
+            <button class="vote-card">∞</button>
+          </div>
+        </article>
+
+        <aside class="panel aside">
+          <div class="micro">Connected users</div>
+          <h2 style="margin-top: 8px;">Live table</h2>
+          <div class="list">
+            <div class="row"><span>Camila</span><span class="dot"></span></div>
+            <div class="row"><span>Nico</span><span class="dot"></span></div>
+            <div class="row"><span>Sofi</span><span class="dot"></span></div>
+            <div class="row"><span>Facu</span><span class="dot"></span></div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="panel history">
+        <div class="micro">History</div>
+        <h2 style="margin-top: 10px;">Previous rounds</h2>
+        <div class="history-grid">
+          <div class="history-row">
+            <div><strong>Round 4</strong><br /><span class="micro">13 votes</span></div>
+            <div>
+              Discount stacking edge-case QA
+              <div class="bar" style="margin-top: 8px;"><span style="--w: 76%;"></span></div>
+            </div>
+            <div><strong>Decision: 8</strong></div>
+          </div>
+
+          <div class="history-row">
+            <div><strong>Round 3</strong><br /><span class="micro">11 votes</span></div>
+            <div>
+              Merge duplicate carts after login
+              <div class="bar" style="margin-top: 8px;"><span style="--w: 58%;"></span></div>
+            </div>
+            <div><strong>Decision: 5</strong></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

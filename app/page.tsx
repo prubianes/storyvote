@@ -80,59 +80,80 @@ export default function Page() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 pb-12 pt-6 sm:px-6">
-      <section className="mx-auto max-w-2xl rounded-3xl border border-slate-700 bg-slate-900/75 p-8 shadow-2xl shadow-slate-950/40">
-        <p className="text-sm font-semibold uppercase tracking-wider text-cyan-300">{t('home.badge')}</p>
-        <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-100">{t('home.welcome')}</h2>
-        <p className="mt-3 text-slate-400">{t('home.description')}</p>
+    <main className="page-shell">
+      <section className="landing-grid">
+        <article className="landing-main">
+          <section className="ui-panel title-panel">
+            <p className="micro-label">{t('home.badge')}</p>
+            <h2 className="hero-title">{t('home.welcome')}</h2>
+          </section>
 
-        <form onSubmit={handleForm} className="mt-8 space-y-4">
-          <label className="block">
-            <span className="mb-2 block text-sm text-slate-300">{t('home.name')}</span>
-            <input
-              type="text"
-              id="user"
-              name="user"
-              placeholder={t('home.namePlaceholder')}
-              required
-              className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
-            />
-          </label>
+          <section className="ui-panel form-panel">
+            <p className="hero-copy">{t('home.description')}</p>
+            <form onSubmit={handleForm} className="hero-form">
+              <label className="field">
+                <span className="field-label">{t('home.name')}</span>
+                <input
+                  type="text"
+                  id="user"
+                  name="user"
+                  placeholder={t('home.namePlaceholder')}
+                  required
+                  className="field-input"
+                />
+              </label>
 
-          <label className="block">
-            <span className="mb-2 block text-sm text-slate-300">{t('home.room')}</span>
-            <input
-              type="text"
-              id="room"
-              name="room"
-              placeholder={t('home.roomPlaceholder')}
-              required
-              className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
-            />
-          </label>
+              <label className="field">
+                <span className="field-label">{t('home.room')}</span>
+                <input
+                  type="text"
+                  id="room"
+                  name="room"
+                  placeholder={t('home.roomPlaceholder')}
+                  required
+                  className="field-input"
+                />
+              </label>
 
-          <label className="block">
-            <span className="mb-2 block text-sm text-slate-300">
-              {t('home.adminPasscodeOptional')}
-            </span>
-            <input
-              type="password"
-              id="adminPasscode"
-              name="adminPasscode"
-              placeholder={t('home.adminPasscodePlaceholder')}
-              className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
-            />
-          </label>
+              <label className="field">
+                <span className="field-label">{t('home.adminPasscodeOptional')}</span>
+                <input
+                  type="password"
+                  id="adminPasscode"
+                  name="adminPasscode"
+                  placeholder={t('home.adminPasscodePlaceholder')}
+                  className="field-input"
+                />
+              </label>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="mt-2 w-full rounded-xl bg-cyan-500 px-4 py-3 font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300"
-          >
-            {isSubmitting ? t('home.entering') : t('home.enter')}
-          </button>
-          {formError ? <p className="text-sm text-rose-300">{formError}</p> : null}
-        </form>
+              <button type="submit" disabled={isSubmitting} className="ui-btn is-cyan">
+                {isSubmitting ? t('home.entering') : t('home.enter')}
+              </button>
+
+              {formError ? <p className="error-text">{formError}</p> : null}
+            </form>
+          </section>
+        </article>
+
+        <aside className="landing-side">
+          <section className="ui-panel note-panel">
+            <p className="micro-label">{t('room.currentStory')}</p>
+            <h3 style={{ marginTop: '0.8rem', fontSize: 'clamp(2.4rem, 4.4vw, 4.8rem)' }}>
+              {t('home.featureTitle')}
+            </h3>
+            <p className="hero-copy" style={{ marginTop: '0.8rem' }}>
+              {t('home.featureBody')}
+            </p>
+          </section>
+
+          <section className="ui-panel metric-panel">
+            <p className="micro-label" style={{ color: 'rgba(255, 246, 239, 0.78)' }}>
+              {t('aside.votesCast')}
+            </p>
+            <span className="metric-value">08</span>
+            <p style={{ margin: 0, lineHeight: 1.55 }}>{t('home.metricBody')}</p>
+          </section>
+        </aside>
       </section>
     </main>
   )
