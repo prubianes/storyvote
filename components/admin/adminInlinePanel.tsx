@@ -360,11 +360,7 @@ export default function AdminInlinePanel({
     if (!showAuthForm) {
       return (
         <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={() => setShowAuthForm(true)}
-            className="rounded-lg border border-slate-600 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:border-cyan-500 hover:text-cyan-300"
-          >
+          <button type="button" onClick={() => setShowAuthForm(true)} className="ui-btn is-red">
             {t('admin.modeButton')}
           </button>
         </div>
@@ -372,22 +368,19 @@ export default function AdminInlinePanel({
     }
 
     return (
-      <section className="rounded-xl border border-slate-700 bg-slate-900/60 p-4">
-        <p className="text-sm font-semibold text-slate-100">{t('admin.modeTitle')}</p>
-        <p className="mt-1 text-xs text-slate-400">{t('admin.modeDescription')}</p>
-        <form onSubmit={handleAuth} className="mt-3 flex flex-wrap items-center gap-2">
+      <section className="story-box">
+        <p className="micro-label">{t('admin.modeTitle')}</p>
+        <p style={{ color: 'var(--muted)', margin: '0.5rem 0 0' }}>{t('admin.modeDescription')}</p>
+        <form onSubmit={handleAuth} className="action-row" style={{ marginTop: '1rem' }}>
           <input
             type="password"
             id="passcode-inline"
             name="passcode"
             placeholder="Passcode"
-            className="min-w-[180px] flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
+            className="field-input"
+            style={{ flex: '1 1 12rem' }}
           />
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="rounded-lg bg-cyan-500 px-3 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
-          >
+          <button type="submit" disabled={isSubmitting} className="ui-btn is-cyan">
             {isSubmitting ? t('admin.entering') : t('admin.enter')}
           </button>
           <button
@@ -396,27 +389,21 @@ export default function AdminInlinePanel({
               setShowAuthForm(false)
               setAuthError('')
             }}
-            className="rounded-lg border border-slate-600 px-3 py-2 text-sm font-semibold text-slate-300 transition hover:border-slate-400 hover:text-slate-100"
+            className="ui-btn"
           >
             {t('admin.cancel')}
           </button>
         </form>
-        {authError ? <p className="mt-2 text-xs text-rose-300">{authError}</p> : null}
+        {authError ? <p className="error-text">{authError}</p> : null}
       </section>
     )
   }
 
   return (
-    <section className="rounded-xl border border-cyan-700/50 bg-slate-900/70 p-4">
+    <section className="story-box">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-cyan-200">{t('admin.panelTitle')}</p>
-        <span
-          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${
-            roundActive
-              ? 'border border-emerald-400/40 bg-emerald-400/10 text-emerald-300'
-              : 'border border-amber-400/40 bg-amber-400/10 text-amber-300'
-          }`}
-        >
+        <p className="micro-label">{t('admin.panelTitle')}</p>
+        <span className={`status-chip ${roundActive ? 'is-open' : 'is-closed'}`}>
           {roundStatusLabel}
         </span>
       </div>
@@ -429,22 +416,18 @@ export default function AdminInlinePanel({
           value={storyDraft}
           onChange={(e) => setStoryDraft(e.target.value)}
           placeholder={t('admin.storyPlaceholder')}
-          className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
+          className="field-input"
         />
       </form>
 
-      {authError ? <p className="mt-2 text-xs text-rose-300">{authError}</p> : null}
+      {authError ? <p className="error-text">{authError}</p> : null}
 
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="action-row">
         <button
           type="button"
           onClick={handleToggleRound}
           disabled={isSubmitting}
-          className={`rounded-lg border px-3 py-2 text-sm font-semibold transition ${
-            roundActive
-              ? 'border-amber-500/50 text-amber-300 hover:border-amber-400 hover:text-amber-200'
-              : 'border-emerald-500/50 text-emerald-300 hover:border-emerald-400 hover:text-emerald-200'
-          } disabled:cursor-not-allowed disabled:opacity-50`}
+          className={`ui-btn ${roundActive ? 'is-blue' : 'is-mint'}`}
         >
           {roundActive ? t('admin.closeRound') : t('admin.openRound')}
         </button>
@@ -453,7 +436,7 @@ export default function AdminInlinePanel({
           type="submit"
           form="inline-story-form"
           disabled={isSubmitting || !roundActive}
-          className="rounded-lg bg-cyan-500 px-3 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+          className="ui-btn is-cyan"
         >
           {isSubmitting ? t('admin.saving') : t('admin.updateStory')}
         </button>
@@ -462,7 +445,7 @@ export default function AdminInlinePanel({
           type="button"
           onClick={handleReset}
           disabled={isSubmitting || !roundActive}
-          className="rounded-lg border border-rose-500/50 px-3 py-2 text-sm font-semibold text-rose-300 transition hover:border-rose-400 hover:text-rose-200 disabled:cursor-not-allowed disabled:opacity-50"
+          className="ui-btn is-red"
         >
           {t('admin.resetVotes')}
         </button>
@@ -471,7 +454,7 @@ export default function AdminInlinePanel({
           type="button"
           onClick={handleExportPdf}
           disabled={isExporting || !historyRounds.length}
-          className="rounded-lg border border-indigo-500/50 px-3 py-2 text-sm font-semibold text-indigo-300 transition hover:border-indigo-400 hover:text-indigo-200 disabled:cursor-not-allowed disabled:opacity-50"
+          className="ui-btn is-blue"
         >
           {isExporting ? t('admin.exporting') : t('admin.exportHistoryPdf')}
         </button>

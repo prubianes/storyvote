@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>StoryVote UI Explorations</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@400;600&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap");
+
+      :root {
+        --bg: #131111;
+        --panel: rgba(255, 255, 255, 0.06);
+        --border: rgba(255, 255, 255, 0.14);
+        --text: #f2ebe1;
+        --muted: rgba(242, 235, 225, 0.65);
+        --accent: #f0b35a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "IBM Plex Sans", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(240, 179, 90, 0.18), transparent 26%),
+          radial-gradient(circle at bottom right, rgba(122, 193, 168, 0.14), transparent 22%),
+          linear-gradient(160deg, #0f0d0d, #1d1716 45%, #0e1114);
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        background-size: 40px 40px;
+        opacity: 0.25;
+      }
+
+      main {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 56px 24px 72px;
+      }
+
+      .eyebrow {
+        font-family: "Chivo Mono", monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.22em;
+        font-size: 12px;
+        color: var(--accent);
+      }
+
+      h1 {
+        margin: 12px 0 10px;
+        font-family: "Fraunces", serif;
+        font-size: clamp(44px, 8vw, 82px);
+        line-height: 0.94;
+        letter-spacing: -0.05em;
+      }
+
+      .lead {
+        max-width: 760px;
+        font-size: 19px;
+        line-height: 1.65;
+        color: var(--muted);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 22px;
+        margin-top: 40px;
+      }
+
+      .card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        padding: 28px;
+        background: var(--panel);
+        backdrop-filter: blur(12px);
+        text-decoration: none;
+        color: inherit;
+        transform: translateY(18px);
+        opacity: 0;
+        animation: rise 0.7s cubic-bezier(.2,.8,.2,1) forwards;
+      }
+
+      .card:nth-child(2) {
+        animation-delay: 120ms;
+      }
+
+      .card:nth-child(3) {
+        animation-delay: 240ms;
+      }
+
+      .card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(255, 255, 255, 0.28);
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        inset: auto -14% -22% auto;
+        width: 180px;
+        height: 180px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        filter: blur(10px);
+      }
+
+      .card h2 {
+        margin: 12px 0 10px;
+        font-family: "Fraunces", serif;
+        font-size: 32px;
+      }
+
+      .meta {
+        font-family: "Chivo Mono", monospace;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--muted);
+      }
+
+      .card p {
+        margin: 0;
+        line-height: 1.6;
+        color: var(--muted);
+      }
+
+      @keyframes rise {
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @media (max-width: 920px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="eyebrow">StoryVote / Concept Deck</div>
+      <h1>Three visual directions for the next version.</h1>
+      <p class="lead">
+        Each concept is a full HTML/CSS-only exploration for the same product: room entry,
+        voting interface, admin controls, and history. Open each option and choose the one
+        worth turning into the real app.
+      </p>
+
+      <section class="grid">
+        <a class="card" href="./modern.html">
+          <div class="meta">Option 01</div>
+          <h2>Modern Atelier</h2>
+          <p>
+            Editorial, warm, asymmetrical, and refined. Light-toned surfaces, copper accents,
+            elegant typography, and layered glass forms.
+          </p>
+        </a>
+
+        <a class="card" href="./brutalist.html">
+          <div class="meta">Option 02</div>
+          <h2>Brutalist Broadcast</h2>
+          <p>
+            Poster-grade hierarchy, exposed borders, industrial type, hard shadows, and loud
+            contrast. Intentionally raw and anti-polished.
+          </p>
+        </a>
+
+        <a class="card" href="./scifi.html">
+          <div class="meta">Option 03</div>
+          <h2>Orbital Console</h2>
+          <p>
+            Deep-space command UI with scanlines, luminous data panes, technical labels, and
+            system-status motion built from pure CSS.
+          </p>
+        </a>
+      </section>
+
+      <section class="grid" style="margin-top: 22px;">
+        <a class="card" href="./brutalist-dark.html">
+          <div class="meta">Variant</div>
+          <h2>Brutalist Broadcast Dark</h2>
+          <p>
+            A dark-mode counterpart to the brutalist route using red, cyan, blue, and mint only.
+            No yellow in the palette.
+          </p>
+        </a>
+      </section>
+    </main>
+  </body>
+</html>

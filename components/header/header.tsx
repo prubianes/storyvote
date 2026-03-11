@@ -22,14 +22,17 @@ export default function Header() {
   }, [setUser])
 
   useEffect(() => {
-    setTheme('dark')
-    document.documentElement.classList.remove('theme-light')
+    const savedTheme = localStorage.getItem('storyvote_theme')
+    const nextTheme = savedTheme === 'light' ? 'light' : 'dark'
+    setTheme(nextTheme)
+    document.documentElement.classList.toggle('theme-light', nextTheme === 'light')
   }, [])
 
   const toggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark'
     setTheme(nextTheme)
     document.documentElement.classList.toggle('theme-light', nextTheme === 'light')
+    localStorage.setItem('storyvote_theme', nextTheme)
   }
 
   const resetAll = async () => {
@@ -55,30 +58,28 @@ export default function Header() {
   }
 
   return (
-    <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-6 sm:px-6">
-      <h1 className="flex items-center gap-3 text-xl font-semibold tracking-tight text-slate-100 sm:text-2xl">
-        <Image src="/logo.svg" width={42} height={42} alt="StoryVote Logo" priority className="theme-logo" />
-        <span>{room ? `StoryVote @ ${room}` : 'StoryVote'}</span>
-      </h1>
+    <header className="app-header mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
+      <div className="brand-stack">
+        <div className="brand-badge">
+          <Image src="/logo.svg" width={26} height={26} alt="StoryVote Logo" priority className="theme-logo" />
+        </div>
+        <div>
+          <span className="brand-meta">Planning poker</span>
+          <h1 className="brand-name">{room ? `StoryVote @ ${room}` : 'StoryVote'}</h1>
+        </div>
+      </div>
 
-      <div className="flex items-center gap-4">
+      <div className="header-controls">
         {user ? (
-          <div className="text-right">
-            <p className="text-sm text-slate-400">{t('header.greeting', { user })}</p>
-            <button
-              type="button"
-              onClick={resetAll}
-              className="text-sm font-medium text-cyan-300 transition hover:text-cyan-200"
-            >
-              {t('header.exit')}
-            </button>
+          <div className="user-slab">
+            <span className="user-slab-item">{room ? `${user} @ ${room}` : user}</span>
           </div>
         ) : null}
 
         <button
           type="button"
           onClick={toggleLanguage}
-          className="rounded-lg border border-slate-600 px-2 py-1.5 text-xs font-semibold text-cyan-300 transition hover:border-cyan-500 hover:text-cyan-200"
+          className="ui-btn"
           aria-label={t('header.languageAria', {
             lang: language === 'es' ? t('header.languageNameEn') : t('header.languageNameEs'),
           })}
@@ -89,7 +90,7 @@ export default function Header() {
         <button
           type="button"
           onClick={toggleTheme}
-          className="rounded-lg border border-slate-600 p-2 text-cyan-300 transition hover:border-cyan-500 hover:text-cyan-200"
+          className="ui-btn is-cyan"
           aria-label={t('header.themeAria', {
             mode: theme === 'dark' ? t('header.themeModeLight') : t('header.themeModeDark'),
           })}
@@ -113,6 +114,12 @@ export default function Header() {
             </svg>
           )}
         </button>
+
+        {user ? (
+          <button type="button" onClick={resetAll} className="ui-btn is-red">
+            {t('header.exit')}
+          </button>
+        ) : null}
       </div>
     </header>
   )

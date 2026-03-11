@@ -1,9 +1,11 @@
-import type { Dispatch, SetStateAction } from 'react'
+import type { CSSProperties, Dispatch, SetStateAction } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import { castVote } from '@/system/supabase'
 import { useI18n } from '@/components/LanguageContext/languageContextProvider'
 
 const values: Array<number | '∞'> = [1, 2, 3, 5, 8, 13, 20, '∞']
+const voteColors = ['#ff5a3c', '#ff8b5e', '#65d8e6', '#5c7cff', '#6ce0b3', '#9fe6ff', '#f4f0e8', '#8896a4']
+const voteTextColors = ['#fff6ef', '#111111', '#071316', '#f5f2ff', '#07130e', '#071316', '#111111', '#f4f0e8']
 
 interface KeypadProps {
   votes: number[]
@@ -28,6 +30,10 @@ export default function Keypad({ votes, room, roundActive, voterKey, onVotesChan
   }, [votes])
 
   const maxVotes = votes.reduce((partial, value) => partial + value, 0) || 1
+  const meterStyle = (value: number) =>
+    ({ '--w': maxVotes > 0 ? `${Math.max(0, (value / maxVotes) * 100)}%` : '0%' }) as CSSProperties
+  const voteStyle = (index: number) =>
+    ({ '--vote-hover': voteColors[index], '--vote-hover-ink': voteTextColors[index] }) as CSSProperties
 
   const handleVote = async (vote: number | '∞') => {
     if (!room || !voterKey || isSubmitting || !roundActive) {
@@ -56,41 +62,44 @@ export default function Keypad({ votes, room, roundActive, voterKey, onVotesChan
   return (
     <>
       {roundActive ? (
-        <p className="mb-4 rounded-lg border border-emerald-400/40 bg-emerald-300/10 px-3 py-2 text-sm text-emerald-200">
+        <p className="status-note is-open">
           {t('keypad.openRoundMessage')}
         </p>
       ) : (
-        <p className="mb-4 rounded-lg border border-amber-400/40 bg-amber-300/10 px-3 py-2 text-sm text-amber-200">
+        <p className="status-note is-closed">
           {t('keypad.closedRoundMessage')}
         </p>
       )}
-      <section className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <section className="vote-deck">
         {availableVotes.map((value) => {
           const isSelected = selectedVote === value
+          const voteIndex = availableVotes.indexOf(value)
           return (
             <button
               key={value}
               type="button"
               onClick={() => handleVote(value)}
               disabled={isSubmitting || !roundActive}
-              className={`rounded-xl border px-4 py-4 text-lg font-semibold transition ${
-                isSelected
-                  ? 'border-cyan-300 bg-cyan-500 text-slate-950'
-                  : 'border-slate-700 bg-slate-900 text-slate-100 hover:border-cyan-600 hover:bg-slate-800'
-              } disabled:cursor-not-allowed disabled:opacity-50`}
+              className={`vote-card ${isSelected ? 'is-selected' : ''}`}
+              style={voteStyle(voteIndex)}
             >
               {value}
             </button>
           )
         })}
       </section>
-      {voteError ? <p className="mb-3 text-sm text-rose-300">{voteError}</p> : null}
+      {voteError ? <p className="error-text">{voteError}</p> : null}
 
-      <section className="space-y-3">
+      <section className="meter-list">
         {availableVotes.map((value, index) => (
-          <div key={`key-${value}`}>
-            <p className="mb-1 text-sm text-slate-300">{value}</p>
-            <progress className="h-3 w-full" value={votes[index]} max={maxVotes} />
+          <div key={`key-${value}`} className="meter-row">
+            <p className="meter-label">
+              <span>{t('history.voteLabel', { value })}</span>
+              <span>{votes[index] ?? 0}</span>
+            </p>
+            <div className="meter-track">
+              <span className="meter-fill" style={meterStyle(votes[index] ?? 0)} />
+            </div>
           </div>
         ))}
       </section>

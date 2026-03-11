@@ -11,23 +11,21 @@ export default function Aside({ users, votedUsers = [], votes }: AsideProps) {
   const numberOfVotes = votes.reduce((partial, value) => partial + value, 0)
 
   return (
-    <aside className="rounded-2xl border border-slate-700 bg-slate-900/70 p-5 shadow-lg shadow-slate-950/30">
-      <p className="text-sm text-slate-400">{t('aside.votesCast')}</p>
-      <h3 className="mb-4 text-2xl font-semibold text-cyan-300">{numberOfVotes}</h3>
+    <div>
+      <p className="micro-label">{t('aside.votesCast')}</p>
+      <h3 className="big-number">{String(numberOfVotes).padStart(2, '0')}</h3>
 
-      <h4 className="mb-2 text-sm font-semibold uppercase tracking-wider text-slate-400">
-        {t('aside.connectedUsers')}
-      </h4>
-      <ul className="space-y-2 text-sm text-slate-200">
+      <h4 className="micro-label">{t('aside.connectedUsers')}</h4>
+      <ul className="people-list">
         {(users ?? []).map((user) => (
-          <li key={user} className="flex items-center justify-between rounded-md bg-slate-800/90 px-3 py-2">
+          <li key={user} className="people-item">
             <span>{user}</span>
-            <span className={`text-xs ${votedUsers.includes(user) ? 'text-emerald-300' : 'text-slate-500'}`}>
-              {votedUsers.includes(user) ? '✓' : '·'}
+            <span className={`people-state ${votedUsers.includes(user) ? 'is-active' : 'is-idle'}`}>
+              {votedUsers.includes(user) ? 'READY' : 'WAIT'}
             </span>
           </li>
         ))}
       </ul>
-    </aside>
+    </div>
   )
 }

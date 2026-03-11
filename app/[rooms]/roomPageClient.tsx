@@ -220,17 +220,17 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
   const voterKey = displayName ? buildVoterKey(displayName) : ''
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 pb-12 sm:px-6">
-      <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
-        <section className="rounded-2xl border border-slate-700 bg-slate-900/70 p-6 shadow-lg shadow-slate-950/30">
-          <div className="mb-6">
-            <p className="text-xs uppercase tracking-wide text-cyan-300">{t('room.currentStory')}</p>
-            <h3 className="text-xl font-semibold text-slate-100">
+    <main className="page-shell">
+      <div className="page-grid">
+        <section className="ui-panel stage-panel">
+          <div className="story-box">
+            <p className="micro-label">{t('room.currentStory')}</p>
+            <h3 className="story-heading">
               {story || t('room.undefinedStory')}
             </h3>
           </div>
 
-          <div className="mb-5">
+          <div style={{ marginTop: '1rem' }}>
             <AdminInlinePanel
               roomSlug={roomSlug}
               roundActive={roundActive}
@@ -240,19 +240,23 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
             />
           </div>
 
-          <Keypad
-            votes={votes}
-            room={roomSlug}
-            roundActive={roundActive}
-            voterKey={voterKey}
-            onVotesChange={setVotes}
-          />
+          <div style={{ marginTop: '1rem' }}>
+            <Keypad
+              votes={votes}
+              room={roomSlug}
+              roundActive={roundActive}
+              voterKey={voterKey}
+              onVotesChange={setVotes}
+            />
+          </div>
         </section>
 
-        <Aside users={users} votedUsers={votedUsers} votes={votes} />
+        <aside className="ui-panel sidebar-panel">
+          <Aside users={users} votedUsers={votedUsers} votes={votes} />
+        </aside>
       </div>
 
-      <div className="mt-6">
+      <div>
         <RoundHistory rounds={history} />
       </div>
     </main>
