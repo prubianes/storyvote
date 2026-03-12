@@ -86,7 +86,9 @@ export default function RoundHistory({ rounds }: RoundHistoryProps) {
                 <div className="history-meter">
                   {voteLabels.map((label, voteIndex) => {
                     const value = voteCounts[voteIndex] ?? 0
-                    const width = totalVotes > 0 ? `${(value / totalVotes) * 100}%` : '0%'
+                    const pct = totalVotes > 0 ? (value / totalVotes) * 100 : 0
+                    const width = `${pct}%`
+                    const showInlineLabel = pct >= 20
                     if (value <= 0) {
                       return null
                     }
@@ -102,9 +104,11 @@ export default function RoundHistory({ rounds }: RoundHistoryProps) {
                         }}
                         title={`(${label}): ${value} ${t('history.votesWord')}`}
                       >
-                        <span className="history-meter-segment-label">
-                          ({label}): {value} {t('history.votesWord')}
-                        </span>
+                        {showInlineLabel ? (
+                          <span className="history-meter-segment-label">
+                            ({label}): {value} {t('history.votesWord')}
+                          </span>
+                        ) : null}
                       </div>
                     )
                   })}

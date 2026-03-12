@@ -79,7 +79,7 @@ export default function Header() {
         <button
           type="button"
           onClick={toggleLanguage}
-          className="ui-btn"
+          className="ui-btn header-lang-btn"
           aria-label={t('header.languageAria', {
             lang: language === 'es' ? t('header.languageNameEn') : t('header.languageNameEs'),
           })}
@@ -90,7 +90,7 @@ export default function Header() {
         <button
           type="button"
           onClick={toggleTheme}
-          className="ui-btn is-cyan"
+          className="ui-btn is-cyan header-theme-btn"
           aria-label={t('header.themeAria', {
             mode: theme === 'dark' ? t('header.themeModeLight') : t('header.themeModeDark'),
           })}
@@ -116,7 +116,7 @@ export default function Header() {
         </button>
 
         {user ? (
-          <button type="button" onClick={resetAll} className="ui-btn is-red">
+          <button type="button" onClick={resetAll} className="ui-btn is-red header-exit-btn">
             {t('header.exit')}
           </button>
         ) : null}
