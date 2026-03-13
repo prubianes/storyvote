@@ -1,22 +1,14 @@
 # StoryVote
 
-StoryVote is a real-time planning poker app for scrum teams.
+StoryVote is a realtime planning poker app for scrum teams.
 
-This repository is the rebooted version of the original project, now based on Next.js App Router, TypeScript, Tailwind, and Supabase.
-
-## What It Does
-
-- Create or join a room with a display name.
-- Run estimation rounds with Fibonacci-like cards: `1, 2, 3, 5, 8, 13, 20, ∞`.
-- Keep participants synced in real time with heartbeat presence.
-- Use inline admin controls (inside the room screen) to:
-  - Update story
-  - Open/close round
-  - Reset votes (without closing round)
-- Track closed rounds in a history panel with:
-  - Round value (most voted value / tie)
-  - Vote distribution visualization
-  - Round timestamps
+Version `v1.0.0` includes:
+- Realtime room presence with heartbeat and inactivity handling
+- Round lifecycle: `open -> revealed -> reopened -> closed`
+- Inline admin controls (passcode + cookie session)
+- Round history and PDF export
+- ES/EN support and dark/light theme toggle
+- CI quality gate (`pnpm verify`)
 
 ## Tech Stack
 
@@ -25,21 +17,43 @@ This repository is the rebooted version of the original project, now based on Ne
 - TypeScript
 - Tailwind CSS 4
 - Supabase (Postgres + Realtime)
+- Playwright (smoke E2E)
 
-## Current UX Model
+## Architecture
 
-- Admin is inline in the room page (no separate admin workflow needed).
-- Non-admin users only see a `Modo admin` entry button.
-- Admin auth uses server-validated passcode and httpOnly cookie session.
-- Presence goes inactive after 5 minutes without interaction.
+```mermaid
+flowchart LR
+  U["Browser Client (Next.js UI)"]
+  A["Next.js API Routes (/api/admin/*, /api/presence)"]
+  S["Supabase Postgres + RPC + Realtime"]
+  C["Admin Cookie Session"]
+  CI["GitHub Actions CI"]
+
+  U -->|"vote / room sync"| S
+  U -->|"admin actions"| A
+  A -->|"server-key RPC/update"| S
+  A -->|"issue/verify"| C
+  U -->|"realtime subscribe"| S
+  CI -->|"pnpm verify"| U
+```
+
+## Main Flows
+
+1. User enters `name + room` and joins.
+2. Presence is upserted and synced in realtime.
+3. Admin opens round with a story.
+4. Team votes with Fibonacci cards (`1, 2, 3, 5, 8, 13, 20, ∞`).
+5. Admin reveals votes, can re-open for another pass, then closes.
+6. Closed rounds appear in history and can be exported to PDF.
 
 ## Project Structure
 
-- `/Users/pablo/Projects/storyvote/app` - Next.js routes and pages
+- `/Users/pablo/Projects/storyvote/app` - routes/pages/API endpoints
 - `/Users/pablo/Projects/storyvote/components` - UI and feature components
-- `/Users/pablo/Projects/storyvote/system` - Supabase and session helpers
-- `/Users/pablo/Projects/storyvote/supabase/migrations` - SQL migrations
-- `/Users/pablo/Projects/storyvote/docs` - release and operational documentation
+- `/Users/pablo/Projects/storyvote/system` - Supabase + admin session helpers
+- `/Users/pablo/Projects/storyvote/supabase/migrations` - DB migrations
+- `/Users/pablo/Projects/storyvote/e2e` - Playwright smoke tests
+- `/Users/pablo/Projects/storyvote/docs` - release and ops docs
 
 ## Environment Variables
 
@@ -54,77 +68,81 @@ ADMIN_SESSION_SECRET=
 
 Notes:
 - `NEXT_PUBLIC_*` values are client-visible.
-- `SUPABASE_SERVICE_ROLE_KEY` is server-only and must never be exposed.
-- `ADMIN_SESSION_SECRET` should be a long random string.
+- `SUPABASE_SERVICE_ROLE_KEY` is server-only and must never be exposed to client code.
+- `ADMIN_SESSION_SECRET` should be a long random secret.
 
-## Setup
+## Database Migration Strategy
+
+Choose exactly one path:
+
+1. Fresh environment (recommended):
+- Apply `/Users/pablo/Projects/storyvote/supabase/migrations/000_baseline_v1.sql`
+
+2. Existing environment upgrading from older versions:
+- Apply incremental migrations in order:
+  - `001_init_rooms.sql` ... `011_round_reveal_workflow.sql`
+
+Do not apply both baseline and incrementals on the same fresh database.
+
+## Local Setup
 
 1. Install dependencies:
+
 ```bash
 pnpm install
 ```
 
 2. Configure `.env.local`.
+3. Apply DB migrations using one strategy above.
+4. Start dev server:
 
-3. Apply migrations in order:
-- `/Users/pablo/Projects/storyvote/supabase/migrations/001_init_rooms.sql`
-- `/Users/pablo/Projects/storyvote/supabase/migrations/002_lockdown_admin.sql`
-- `/Users/pablo/Projects/storyvote/supabase/migrations/003_atomic_vote_delta.sql`
-- `/Users/pablo/Projects/storyvote/supabase/migrations/004_rounds_votes.sql`
-- `/Users/pablo/Projects/storyvote/supabase/migrations/005_round_lifecycle_history.sql`
-- `/Users/pablo/Projects/storyvote/supabase/migrations/006_participants_heartbeat.sql`
-- `/Users/pablo/Projects/storyvote/supabase/migrations/007_reset_votes_only.sql`
-- `/Users/pablo/Projects/storyvote/supabase/migrations/008_room_state_voted_users.sql`
-- `/Users/pablo/Projects/storyvote/supabase/migrations/009_deprecate_rooms_users.sql`
-- `/Users/pablo/Projects/storyvote/supabase/migrations/010_remove_legacy_rooms_votes.sql`
-- `/Users/pablo/Projects/storyvote/supabase/migrations/011_round_reveal_workflow.sql`
-
-4. Start development server:
 ```bash
 pnpm dev
 ```
 
-5. Open:
-- [http://localhost:3000](http://localhost:3000)
-
-6. (Optional) For E2E smoke tests, install Playwright tooling:
-```bash
-pnpm add -D @playwright/test
-pnpm exec playwright install --with-deps chromium
-```
+5. Open [http://localhost:3000](http://localhost:3000).
 
 ## Scripts
 
 - `pnpm dev` - start dev server
 - `pnpm build` - production build
-- `pnpm build:ci` - production build (webpack mode for CI stability)
-- `pnpm start` - run production build
-- `pnpm lint` - lint project
-- `pnpm typecheck` - generate route types + TypeScript checks
-- `pnpm test:e2e` - run Playwright smoke tests
-- `pnpm test:e2e:headed` - run Playwright smoke tests in headed mode
-- `pnpm verify` - lint + typecheck + build + e2e (release gate)
+- `pnpm build:ci` - production build in webpack mode (CI-stable)
+- `pnpm start` - start production server
+- `pnpm lint` - ESLint checks
+- `pnpm typecheck` - route typegen + TypeScript checks
+- `pnpm test:e2e` - Playwright smoke suite
+- `pnpm test:e2e:headed` - headed Playwright run
+- `pnpm verify` - full gate: lint + typecheck + build + e2e
 
-## Presence / Heartbeat Rules
+## API Endpoints
 
-- User becomes active on room join.
-- Heartbeat runs every 60 seconds while the user is active.
-- If no interaction for 5 minutes, user is marked inactive.
-- On logout and page leave/hide, app sends keepalive inactive mark via `/api/presence`.
+Admin/session and presence:
+- `/api/admin/session`
+- `/api/admin/story`
+- `/api/admin/reset`
+- `/api/admin/round/start`
+- `/api/admin/round/reveal`
+- `/api/admin/round/reopen`
+- `/api/admin/round/end`
+- `/api/presence`
 
-## Security Model (Current)
+## Presence and Session Rules
 
-- Admin passcode is hashed in DB.
-- Admin session is stored as signed httpOnly cookie.
-- Admin actions go through server routes:
-  - `/api/admin/session`
-  - `/api/admin/story`
-  - `/api/admin/round/start`
-  - `/api/admin/round/end`
-  - `/api/admin/reset`
-  - `/api/presence`
+- Presence heartbeat interval: 60s
+- Inactivity timeout: 5 minutes
+- On page hide/leave, client sends keepalive inactive mark
+- Admin auth is passcode validated server-side and persisted as signed httpOnly cookie
 
-## Release Process
+## Testing and CI
 
-- CI runs the `verify` quality gate on pushes and pull requests.
-- Use `/Users/pablo/Projects/storyvote/docs/release-checklist.md` before tagging a release.
+- CI workflow runs `pnpm verify` on push/PR
+- Current smoke tests cover:
+  - language toggle persistence
+  - theme toggle persistence
+  - custom not-found flow
+  - creating a new room requires admin passcode
+
+## Release
+
+- Use `/Users/pablo/Projects/storyvote/docs/release-checklist.md` before tagging
+- Ensure migration `011_round_reveal_workflow.sql` is applied on upgraded environments

@@ -16,7 +16,9 @@ Use this checklist before tagging a release.
 
 ## 3) Database
 
-- [ ] Apply migrations in order, including:
+- [ ] For fresh environments, apply:
+  - `000_baseline_v1.sql`
+- [ ] For existing environments, apply incremental migrations up to:
   - `011_round_reveal_workflow.sql`
 - [ ] Validate RPCs:
   - `get_room_state`
