@@ -34,29 +34,65 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
   const [users, setUsers] = useState<string[]>([])
   const [votedUsers, setVotedUsers] = useState<string[]>([])
   const [roundActive, setRoundActive] = useState(true)
+  const [roundStatus, setRoundStatus] = useState<'open' | 'revealed' | 'closed'>('closed')
   const [history, setHistory] = useState<HistoryRound[]>([])
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
+  const [syncState, setSyncState] = useState<'online' | 'syncing' | 'reconnecting' | 'error'>('syncing')
   const { setRoom } = useContext(RoomContext)
-  const [displayName, setDisplayName] = useState('')
-  const lastInteractionRef = useRef<number>(Date.now())
+  const [displayName] = useState(() => {
+    if (typeof window === 'undefined') {
+      return ''
+    }
+    return sessionStorage.getItem('user') || localStorage.getItem('user') || ''
+  })
+  const lastInteractionRef = useRef<number>(0)
   const isPresenceActiveRef = useRef<boolean>(true)
+  const hasCompletedFirstSyncRef = useRef(false)
 
   useEffect(() => {
-    setDisplayName(sessionStorage.getItem('user') || localStorage.getItem('user') || '')
+    lastInteractionRef.current = Date.now()
   }, [])
 
-  const syncRoomSnapshot = (data: RoomState) => {
+  const syncRoomSnapshot = useCallback((data: RoomState) => {
+    const latestUsers = data.users ?? []
+    const usersWithSelf =
+      displayName && !latestUsers.includes(displayName) ? [displayName, ...latestUsers] : latestUsers
     setVotes(data.votes ?? initialVoteState)
     setStory(data.story ?? '')
-    setUsers(data.users ?? [])
+    setUsers(usersWithSelf)
     setVotedUsers(data.voted_users ?? [])
     setRoundActive(Boolean(data.round_active))
-  }
+    setRoundStatus(data.round_status ?? 'closed')
+  }, [displayName])
 
-  const syncRoomAndHistory = useCallback(async (slug: string) => {
+  const syncRoomAndHistory = useCallback(async (slug: string, intent: 'normal' | 'reconnect' = 'normal') => {
+    if (intent === 'reconnect') {
+      setSyncState('reconnecting')
+    } else if (hasCompletedFirstSyncRef.current) {
+      setSyncState('syncing')
+    }
+
     const [latest, latestHistory] = await Promise.all([getRoomState(slug), getRoomHistory(slug)])
     syncRoomSnapshot(latest)
     setHistory(latestHistory)
-  }, [])
+    setSyncState('online')
+    setIsInitialLoading(false)
+    hasCompletedFirstSyncRef.current = true
+  }, [syncRoomSnapshot])
+
+  const attemptSync = useCallback(
+    async (slug: string, intent: 'normal' | 'reconnect' = 'normal') => {
+      try {
+        await syncRoomAndHistory(slug, intent)
+        return true
+      } catch {
+        setSyncState('error')
+        setIsInitialLoading(false)
+        return false
+      }
+    },
+    [syncRoomAndHistory]
+  )
 
   useEffect(() => {
     if (!roomSlug) {
@@ -148,13 +184,17 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
     async function loadRoom() {
       await postPresence(true).catch(() => upsertParticipantPresence(roomSlug, displayName, true))
       isPresenceActiveRef.current = true
-      await syncRoomAndHistory(roomSlug)
+      setUsers((current) => (current.includes(displayName) ? current : [displayName, ...current]))
+      await attemptSync(roomSlug, 'reconnect')
+      window.setTimeout(() => {
+        void attemptSync(roomSlug, 'normal')
+      }, 350)
 
       channel = subscribeToRoom(roomSlug, async () => {
         if (!mounted) {
           return
         }
-        await syncRoomAndHistory(roomSlug)
+        await attemptSync(roomSlug, 'normal')
       })
 
       pollId = setInterval(async () => {
@@ -162,7 +202,10 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
           return
         }
         try {
-          await syncRoomAndHistory(roomSlug)
+          const ok = await attemptSync(roomSlug, 'reconnect')
+          if (!ok) {
+            return
+          }
         } catch {
           // Ignore transient fetch errors and keep polling.
         }
@@ -215,7 +258,7 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
       void postPresence(false, true).catch(() => markParticipantLeft(roomSlug, displayName))
       void clearAdminSession(true).catch(() => undefined)
     }
-  }, [displayName, roomSlug, syncRoomAndHistory])
+  }, [attemptSync, displayName, roomSlug])
 
   const voterKey = displayName ? buildVoterKey(displayName) : ''
 
@@ -223,6 +266,23 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
     <main className="page-shell">
       <div className="page-grid">
         <section className="ui-panel stage-panel">
+          {syncState === 'error' ? (
+            <div style={{ marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.7rem', flexWrap: 'wrap' }}>
+              <p className="error-text" style={{ margin: 0 }}>
+                {t('room.syncError')}
+              </p>
+              <button
+                type="button"
+                className="ui-btn"
+                onClick={() => {
+                  void attemptSync(roomSlug, 'reconnect')
+                }}
+              >
+                {t('room.retrySync')}
+              </button>
+            </div>
+          ) : null}
+
           <div className="story-box">
             <p className="micro-label">{t('room.currentStory')}</p>
             <h3 className="story-heading">
@@ -233,7 +293,7 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
           <div style={{ marginTop: '1rem' }}>
             <AdminInlinePanel
               roomSlug={roomSlug}
-              roundActive={roundActive}
+              roundStatus={roundStatus}
               currentStory={story}
               historyRounds={history}
               onRoomUpdated={() => syncRoomAndHistory(roomSlug)}
@@ -245,6 +305,7 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
               votes={votes}
               room={roomSlug}
               roundActive={roundActive}
+              roundStatus={roundStatus}
               voterKey={voterKey}
               onVotesChange={setVotes}
             />
@@ -257,7 +318,15 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
       </div>
 
       <div>
-        <RoundHistory rounds={history} />
+        <RoundHistory
+          rounds={history}
+          isLoading={isInitialLoading}
+          isReconnecting={syncState === 'reconnecting'}
+          hasSyncError={syncState === 'error'}
+          onRetrySync={async () => {
+            await attemptSync(roomSlug, 'reconnect')
+          }}
+        />
       </div>
     </main>
   )

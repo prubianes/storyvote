@@ -13,7 +13,9 @@ export default function Aside({ users, votedUsers = [], votes }: AsideProps) {
   return (
     <div>
       <p className="micro-label">{t('aside.votesCast')}</p>
-      <h3 className="big-number">{String(numberOfVotes).padStart(2, '0')}</h3>
+      <h3 className="big-number" aria-live="polite" aria-atomic="true">
+        {String(numberOfVotes).padStart(2, '0')}
+      </h3>
 
       <h4 className="micro-label">{t('aside.connectedUsers')}</h4>
       <ul className="people-list">
@@ -21,7 +23,7 @@ export default function Aside({ users, votedUsers = [], votes }: AsideProps) {
           <li key={user} className="people-item">
             <span>{user}</span>
             <span className={`people-state ${votedUsers.includes(user) ? 'is-active' : 'is-idle'}`}>
-              {votedUsers.includes(user) ? 'READY' : 'WAIT'}
+              {votedUsers.includes(user) ? t('aside.ready') : t('aside.wait')}
             </span>
           </li>
         ))}

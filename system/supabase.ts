@@ -27,6 +27,7 @@ export const initialVoteState = [0, 0, 0, 0, 0, 0, 0, 0] as number[]
 export interface RoomState {
   round_id: string | null
   round_active: boolean
+  round_status: 'open' | 'revealed' | 'closed'
   story: string
   users: string[]
   voted_users: string[]
@@ -42,8 +43,9 @@ export interface CastVoteResult {
 export interface HistoryRound {
   id: string
   story: string
-  status: 'closed' | 'active'
+  status: 'open' | 'revealed' | 'closed'
   created_at: string
+  revealed_at?: string | null
   closed_at: string | null
   vote_counts: number[]
   total_votes: number
@@ -156,6 +158,7 @@ export async function getRoom(room: string): Promise<RoomState> {
     votes: initialVoteState,
     round_id: null,
     round_active: false,
+    round_status: 'closed',
   }
 }
 
@@ -163,6 +166,7 @@ export async function getRoomState(room: string): Promise<RoomState> {
   const data = await callRpc<{
     round_id: string | null
     round_active: boolean
+    round_status: 'open' | 'revealed' | 'closed' | null
     story: string
     users: string[]
     voted_users: string[]
@@ -174,6 +178,12 @@ export async function getRoomState(room: string): Promise<RoomState> {
   return {
     round_id: data.round_id,
     round_active: Boolean(data.round_active),
+    round_status:
+      data.round_status === 'open' || data.round_status === 'revealed'
+        ? data.round_status
+        : data.round_active
+          ? 'open'
+          : 'closed',
     story: data.story ?? '',
     users: data.users ?? [],
     voted_users: data.voted_users ?? [],

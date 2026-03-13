@@ -37,17 +37,27 @@ function formatDateTime(value: string | null, locale: string): string {
 
 interface RoundHistoryProps {
   rounds: HistoryRound[]
+  isLoading?: boolean
+  isReconnecting?: boolean
+  hasSyncError?: boolean
+  onRetrySync?: () => void | Promise<void>
 }
 
-export default function RoundHistory({ rounds }: RoundHistoryProps) {
+export default function RoundHistory({
+  rounds,
+  isLoading = false,
+  isReconnecting = false,
+  hasSyncError = false,
+  onRetrySync,
+}: RoundHistoryProps) {
   const { t, locale } = useI18n()
 
-  if (!rounds.length) {
+  if (isLoading) {
     return (
       <section className="ui-panel history-panel">
         <p className="micro-label">{t('history.title')}</p>
         <h4 style={{ marginTop: '0.8rem', fontSize: 'clamp(2rem, 4vw, 3.8rem)' }}>{t('history.title')}</h4>
-        <p style={{ marginTop: '0.9rem', color: 'var(--muted)' }}>{t('history.empty')}</p>
+        <p style={{ marginTop: '0.9rem', color: 'var(--muted)' }}>{t('history.loading')}</p>
       </section>
     )
   }
@@ -55,7 +65,21 @@ export default function RoundHistory({ rounds }: RoundHistoryProps) {
   return (
     <section className="ui-panel history-panel">
       <p className="micro-label">{t('history.title')}</p>
-      <h4 style={{ marginTop: '0.8rem', fontSize: 'clamp(2rem, 4vw, 3.8rem)' }}>{t('history.title')}</h4>
+      <div className="history-head" style={{ marginTop: '0.8rem' }}>
+        <h4 style={{ fontSize: 'clamp(2rem, 4vw, 3.8rem)' }}>{t('history.title')}</h4>
+      </div>
+      {hasSyncError ? (
+        <div style={{ marginTop: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.7rem', flexWrap: 'wrap' }}>
+          <p className="error-text" style={{ margin: 0 }}>
+            {t('history.syncError')}
+          </p>
+          <button type="button" className="ui-btn" onClick={() => void onRetrySync?.()}>
+            {t('history.retry')}
+          </button>
+        </div>
+      ) : null}
+      {!rounds.length ? <p style={{ marginTop: '0.9rem', color: 'var(--muted)' }}>{t('history.empty')}</p> : null}
+      {rounds.length ? (
       <div className="history-list">
         {rounds.map((round, index) => {
           const voteCounts = round.vote_counts ?? []
@@ -65,7 +89,7 @@ export default function RoundHistory({ rounds }: RoundHistoryProps) {
           return (
             <article key={round.id} className="history-item">
               <div className="history-col-main">
-                <strong>{`Round ${rounds.length - index}`}</strong>
+                <strong>{t('history.roundLabel', { number: rounds.length - index })}</strong>
                 <div className="micro-label" style={{ marginTop: '0.35rem' }}>
                   {t('history.votes', { count: round.total_votes ?? 0 })}
                 </div>
@@ -74,7 +98,6 @@ export default function RoundHistory({ rounds }: RoundHistoryProps) {
               <div className="history-col-story">
                 <h5 className="history-story" title={storyLabel}>
                   {t('history.roundTitle', {
-                    number: rounds.length - index,
                     story: storyLabel,
                   })}
                 </h5>
@@ -126,6 +149,7 @@ export default function RoundHistory({ rounds }: RoundHistoryProps) {
           )
         })}
       </div>
+      ) : null}
     </section>
   )
 }

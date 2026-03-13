@@ -1,8 +1,31 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Smoke', () => {
+  test('language toggle switches copy and persists after reload', async ({ page }) => {
+    await page.goto('/')
+    await page.evaluate(() => {
+      localStorage.removeItem('storyvote_language')
+      sessionStorage.removeItem('storyvote_language')
+    })
+    await page.reload()
+
+    await expect(page.getByRole('heading', { name: /bienvenidos a storyvote/i })).toBeVisible()
+
+    await page.getByRole('button', { name: /cambiar idioma a ingles/i }).click()
+    await expect(page.getByRole('heading', { name: /welcome to storyvote/i })).toBeVisible()
+
+    await page.reload()
+    await expect(page.getByRole('heading', { name: /welcome to storyvote/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /switch language to spanish/i })).toBeVisible()
+  })
+
   test('home renders and theme toggle switches html class', async ({ page }) => {
     await page.goto('/')
+    await page.evaluate(() => {
+      localStorage.removeItem('storyvote_theme')
+      sessionStorage.removeItem('storyvote_theme')
+    })
+    await page.reload()
 
     await expect(page.getByRole('heading', { name: /bienvenidos a storyvote/i })).toBeVisible()
 
@@ -11,6 +34,9 @@ test.describe('Smoke', () => {
 
     await expect(page.locator('html')).not.toHaveClass(/theme-light/)
     await themeButton.click()
+    await expect(page.locator('html')).toHaveClass(/theme-light/)
+
+    await page.reload()
     await expect(page.locator('html')).toHaveClass(/theme-light/)
   })
 

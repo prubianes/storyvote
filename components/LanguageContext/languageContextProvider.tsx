@@ -21,6 +21,8 @@ const translations = {
     'header.languageAria': 'Cambiar idioma a {lang}',
     'header.languageNameEs': 'espanol',
     'header.languageNameEn': 'ingles',
+    'header.guide': 'Guia',
+    'header.guideAria': 'Abrir guia de uso',
 
     'home.badge': 'Planning Poker',
     'home.welcome': 'Bienvenidos a StoryVote',
@@ -34,24 +36,61 @@ const translations = {
     'home.entering': 'Entrando...',
     'home.enter': 'Entrar',
     'home.newRoomNeedsPasscode': 'Para crear una sala nueva debes definir passcode admin.',
+    'home.reservedRoomName': 'Ese nombre de sala esta reservado. Elige otro.',
     'home.featureTitle': 'Salas en tiempo real.',
     'home.featureBody': 'StoryVote convierte la estimacion en un ritual visible, no en una tarea de planilla.',
     'home.metricBody': 'Secuencia Fibonacci, votos en vivo, historial de rondas y controles de admin en una sola superficie.',
 
+    'guide.title': 'Guia de uso',
+    'guide.subtitle': 'Todo lo necesario para usar StoryVote en una sesion real.',
+    'guide.quickTitle': 'Flujo rapido',
+    'guide.quick1': 'Ingresa nombre y sala.',
+    'guide.quick2': 'El admin abre ronda y define historia.',
+    'guide.quick3': 'Cada participante vota.',
+    'guide.quick4': 'El admin revela, reabre (si hace falta) y cierra.',
+    'guide.quick5': 'Revisa historial y exporta PDF.',
+    'guide.rolesTitle': 'Roles',
+    'guide.roleTeamTitle': 'Equipo',
+    'guide.roleTeamDesc': 'Vota cuando la ronda esta abierta y espera revelado.',
+    'guide.roleAdminTitle': 'Admin',
+    'guide.roleAdminDesc': 'Valida passcode y controla historia, ronda, reset y exportacion.',
+    'guide.roundTitle': 'Estados de ronda',
+    'guide.roundOpen': 'Abierta: se puede votar y la distribucion permanece oculta.',
+    'guide.roundRevealed': 'Revelada: se muestran resultados y puedes reabrir o cerrar.',
+    'guide.roundClosed': 'Cerrada: finaliza la ronda y pasa al historial.',
+    'guide.tipsTitle': 'Buenas practicas',
+    'guide.tip1': 'Usa nombres unicos para evitar confusiones en presencia.',
+    'guide.tip2': 'No cierres hasta discutir los outliers.',
+    'guide.tip3': 'Usa reabrir cuando el equipo decide revotar.',
+    'guide.tip4': 'Exporta PDF al finalizar la sesion para dejar evidencia.',
+
     'room.currentStory': 'Historia actual',
     'room.undefinedStory': 'Sin historia definida',
+    'room.loadingState': 'Cargando estado de la sala...',
+    'room.reconnectingState': 'Reconectando y sincronizando sala...',
+    'room.syncError': 'No fue posible sincronizar la sala.',
+    'room.retrySync': 'Reintentar sincronizacion',
 
     'aside.votesCast': 'Votos emitidos',
     'aside.connectedUsers': 'Usuarios conectados',
+    'aside.ready': 'LISTO',
+    'aside.wait': 'ESPERA',
 
     'keypad.openRoundMessage': 'Votacion abierta. Selecciona tu carta.',
+    'keypad.revealedRoundMessage': 'Votacion revelada. Reabre la ronda para seguir votando.',
     'keypad.closedRoundMessage': 'La ronda esta cerrada. Un admin debe iniciar una nueva ronda.',
+    'keypad.hiddenUntilReveal': 'Distribucion oculta hasta revelar votos.',
     'keypad.noActiveRound': 'No hay ronda activa.',
     'keypad.voteError': 'Error al votar.',
 
     'history.title': 'Historial de rondas',
     'history.empty': 'Aun no hay rondas cerradas.',
-    'history.roundTitle': 'Ronda #{number} · {story}',
+    'history.loading': 'Cargando historial...',
+    'history.reconnecting': 'Sincronizando historial...',
+    'history.syncError': 'No fue posible cargar el historial.',
+    'history.retry': 'Reintentar',
+    'history.roundLabel': 'Ronda {number}',
+    'history.roundTitle': 'Historia: {story}',
     'history.noStory': 'Sin historia',
     'history.votes': 'Votos: {count}',
     'history.votesWord': 'votos',
@@ -63,6 +102,7 @@ const translations = {
     'history.voteLabel': 'Voto: {value}',
 
     'admin.roundOpen': 'Ronda abierta',
+    'admin.roundRevealed': 'Ronda revelada',
     'admin.roundClosed': 'Ronda cerrada',
     'admin.invalidPasscode': 'Passcode invalido.',
     'admin.passcodeValidationError': 'No fue posible validar el passcode.',
@@ -74,6 +114,8 @@ const translations = {
     'admin.storyRequiredToOpen': 'Debes ingresar una historia antes de abrir una nueva ronda.',
     'admin.closeRoundFailed': 'No fue posible cerrar la ronda.',
     'admin.openRoundFailed': 'No fue posible abrir una nueva ronda.',
+    'admin.revealRoundFailed': 'No fue posible revelar la ronda.',
+    'admin.reopenRoundFailed': 'No fue posible reabrir la ronda.',
     'admin.exportWindowFailed': 'No fue posible abrir la ventana de exportacion.',
     'admin.modeButton': 'Modo admin',
     'admin.modeTitle': 'Modo Admin',
@@ -85,6 +127,8 @@ const translations = {
     'admin.storyPlaceholder': 'Historia de la ronda',
     'admin.closeRound': 'Cerrar ronda',
     'admin.openRound': 'Abrir ronda',
+    'admin.revealRound': 'Revelar votos',
+    'admin.reopenRound': 'Reabrir ronda',
     'admin.saving': 'Guardando...',
     'admin.updateStory': 'Actualizar historia',
     'admin.resetVotes': 'Resetear votos',
@@ -112,6 +156,8 @@ const translations = {
     'header.languageAria': 'Switch language to {lang}',
     'header.languageNameEs': 'Spanish',
     'header.languageNameEn': 'English',
+    'header.guide': 'Guide',
+    'header.guideAria': 'Open usage guide',
 
     'home.badge': 'Planning Poker',
     'home.welcome': 'Welcome to StoryVote',
@@ -125,24 +171,61 @@ const translations = {
     'home.entering': 'Joining...',
     'home.enter': 'Join',
     'home.newRoomNeedsPasscode': 'To create a new room you must define an admin passcode.',
+    'home.reservedRoomName': 'That room name is reserved. Choose another one.',
     'home.featureTitle': 'Realtime rooms.',
     'home.featureBody': 'StoryVote turns estimation into a visible ritual instead of a spreadsheet chore.',
     'home.metricBody': 'Fibonacci deck, live presence, round history, and admin controls in one surface.',
 
+    'guide.title': 'User guide',
+    'guide.subtitle': 'Everything needed to run StoryVote in a real session.',
+    'guide.quickTitle': 'Quick flow',
+    'guide.quick1': 'Enter your name and room.',
+    'guide.quick2': 'Admin opens a round and sets the story.',
+    'guide.quick3': 'Each participant votes.',
+    'guide.quick4': 'Admin reveals, re-opens (if needed), then closes.',
+    'guide.quick5': 'Review history and export PDF.',
+    'guide.rolesTitle': 'Roles',
+    'guide.roleTeamTitle': 'Team',
+    'guide.roleTeamDesc': 'Vote while the round is open and wait for reveal.',
+    'guide.roleAdminTitle': 'Admin',
+    'guide.roleAdminDesc': 'Validate passcode and control story, round, reset, and export.',
+    'guide.roundTitle': 'Round states',
+    'guide.roundOpen': 'Open: voting allowed and distribution stays hidden.',
+    'guide.roundRevealed': 'Revealed: results are visible and you can re-open or close.',
+    'guide.roundClosed': 'Closed: round is finalized and sent to history.',
+    'guide.tipsTitle': 'Best practices',
+    'guide.tip1': 'Use unique names to avoid presence confusion.',
+    'guide.tip2': 'Do not close before discussing outliers.',
+    'guide.tip3': 'Use re-open when the team agrees to vote again.',
+    'guide.tip4': 'Export PDF at session end for traceability.',
+
     'room.currentStory': 'Current story',
     'room.undefinedStory': 'No story selected',
+    'room.loadingState': 'Loading room state...',
+    'room.reconnectingState': 'Reconnecting and syncing room...',
+    'room.syncError': 'Could not sync room state.',
+    'room.retrySync': 'Retry sync',
 
     'aside.votesCast': 'Votes cast',
     'aside.connectedUsers': 'Connected users',
+    'aside.ready': 'READY',
+    'aside.wait': 'WAIT',
 
     'keypad.openRoundMessage': 'Voting is open. Pick your card.',
+    'keypad.revealedRoundMessage': 'Votes are revealed. Re-open the round to continue voting.',
     'keypad.closedRoundMessage': 'Round is closed. An admin must start a new round.',
+    'keypad.hiddenUntilReveal': 'Distribution is hidden until votes are revealed.',
     'keypad.noActiveRound': 'No active round.',
     'keypad.voteError': 'Error while voting.',
 
     'history.title': 'Round history',
     'history.empty': 'There are no closed rounds yet.',
-    'history.roundTitle': 'Round #{number} · {story}',
+    'history.loading': 'Loading history...',
+    'history.reconnecting': 'Syncing history...',
+    'history.syncError': 'Could not load history.',
+    'history.retry': 'Retry',
+    'history.roundLabel': 'Round {number}',
+    'history.roundTitle': 'Story: {story}',
     'history.noStory': 'No story',
     'history.votes': 'Votes: {count}',
     'history.votesWord': 'votes',
@@ -154,6 +237,7 @@ const translations = {
     'history.voteLabel': 'Vote: {value}',
 
     'admin.roundOpen': 'Round open',
+    'admin.roundRevealed': 'Round revealed',
     'admin.roundClosed': 'Round closed',
     'admin.invalidPasscode': 'Invalid passcode.',
     'admin.passcodeValidationError': 'Could not validate passcode.',
@@ -165,6 +249,8 @@ const translations = {
     'admin.storyRequiredToOpen': 'You must provide a story before opening a new round.',
     'admin.closeRoundFailed': 'Could not close round.',
     'admin.openRoundFailed': 'Could not open a new round.',
+    'admin.revealRoundFailed': 'Could not reveal round.',
+    'admin.reopenRoundFailed': 'Could not reopen round.',
     'admin.exportWindowFailed': 'Could not open export window.',
     'admin.modeButton': 'Admin mode',
     'admin.modeTitle': 'Admin mode',
@@ -176,6 +262,8 @@ const translations = {
     'admin.storyPlaceholder': 'Round story',
     'admin.closeRound': 'Close round',
     'admin.openRound': 'Open round',
+    'admin.revealRound': 'Reveal votes',
+    'admin.reopenRound': 'Re-open round',
     'admin.saving': 'Saving...',
     'admin.updateStory': 'Update story',
     'admin.resetVotes': 'Reset votes',
@@ -227,14 +315,13 @@ interface I18nProviderProps {
 }
 
 export default function LanguageContextProvider({ children }: I18nProviderProps) {
-  const [language, setLanguage] = useState<Language>('es')
-
-  useEffect(() => {
-    const savedLanguage = localStorage.getItem('storyvote_language')
-    if (savedLanguage === 'en' || savedLanguage === 'es') {
-      setLanguage(savedLanguage)
+  const [language, setLanguage] = useState<Language>(() => {
+    if (typeof window === 'undefined') {
+      return 'es'
     }
-  }, [])
+    const savedLanguage = localStorage.getItem('storyvote_language')
+    return savedLanguage === 'en' || savedLanguage === 'es' ? savedLanguage : 'es'
+  })
 
   useEffect(() => {
     localStorage.setItem('storyvote_language', language)

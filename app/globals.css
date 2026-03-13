@@ -97,6 +97,11 @@ button {
   cursor: pointer;
 }
 
+:focus-visible {
+  outline: 3px solid var(--cyan);
+  outline-offset: 3px;
+}
+
 .app-header {
   display: flex;
   justify-content: space-between;
@@ -205,6 +210,7 @@ button {
 .ui-btn:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+  filter: saturate(0.7);
 }
 
 .ui-btn.is-red {
@@ -425,6 +431,11 @@ html.theme-light .theme-logo {
   color: #f5f2ff;
 }
 
+.status-chip.is-revealed {
+  background: var(--cyan);
+  color: #071316;
+}
+
 .status-note {
   border: 3px solid var(--line);
   padding: 0.85rem 1rem;
@@ -476,6 +487,7 @@ html.theme-light .theme-logo {
 
 .vote-card:disabled {
   opacity: 0.45;
+  filter: saturate(0.7);
 }
 
 .meter-list {
@@ -509,6 +521,9 @@ html.theme-light .theme-logo {
   height: 100%;
   width: var(--w);
   background: linear-gradient(90deg, var(--red), var(--cyan), var(--blue));
+  transition: width 1000ms cubic-bezier(0.2, 0.85, 0.22, 1);
+  transition-delay: var(--d, 0ms);
+  will-change: width;
 }
 
 .sidebar-panel {
@@ -563,6 +578,74 @@ html.theme-light .theme-logo {
   gap: 0.9rem;
   margin-top: 1rem;
 }
+
+.history-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.history-head h4 {
+  margin: 0;
+}
+
+.guide-panel {
+  padding: 1.6rem;
+  animation-delay: 120ms;
+}
+
+.guide-shell {
+  max-width: 1160px;
+  padding-top: 1.8rem;
+}
+
+.guide-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+  align-items: stretch;
+}
+
+.guide-block {
+  padding: 1.25rem;
+  animation-delay: 180ms;
+  min-height: 15rem;
+}
+
+.guide-list {
+  margin: 1rem 0 0;
+  padding-left: 1.35rem;
+  display: grid;
+  gap: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.62;
+}
+
+.guide-list.is-bulleted {
+  list-style: disc;
+}
+
+.guide-pairs {
+  margin-top: 1rem;
+  display: grid;
+  gap: 1.1rem;
+}
+
+.guide-pairs h3 {
+  font-size: 1.35rem;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.guide-pairs p {
+  margin: 0.45rem 0 0;
+  color: var(--muted);
+  line-height: 1.62;
+  max-width: 52ch;
+}
+
 
 .history-item {
   display: grid;
@@ -648,6 +731,19 @@ html.theme-light .theme-logo {
   margin-top: 0.7rem;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 @keyframes slam {
   0% {
     opacity: 0;
@@ -707,8 +803,21 @@ html.theme-light .theme-logo {
     grid-column: 3;
   }
 
-  .header-exit-btn {
+  .header-guide-btn {
     grid-column: 4;
+  }
+
+  .header-exit-btn {
+    grid-column: 2 / -1;
+  }
+
+  .guide-grid {
+    grid-template-columns: 1fr;
+    gap: 0.95rem;
+  }
+
+  .guide-block {
+    min-height: 0;
   }
 
   .vote-deck,
