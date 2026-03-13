@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/.pnpm-store/
 /.pnp
 .pnp.js
 
@@ -21,6 +22,10 @@
 # misc
 .DS_Store
 *.pem
+/.codex/
+/.claude/
+/.cursor/
+/.vscode/
 
 # debug
 npm-debug.log*

@@ -12,7 +12,12 @@ export default function Header() {
   const { user, setUser, room, setRoom } = useContext(RoomContext)
   const { language, toggleLanguage, t } = useI18n()
   const router = useRouter()
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    if (typeof window === 'undefined') {
+      return 'dark'
+    }
+    return localStorage.getItem('storyvote_theme') === 'light' ? 'light' : 'dark'
+  })
 
   useEffect(() => {
     const savedUser = sessionStorage.getItem('user') || localStorage.getItem('user')
@@ -22,17 +27,13 @@ export default function Header() {
   }, [setUser])
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('storyvote_theme')
-    const nextTheme = savedTheme === 'light' ? 'light' : 'dark'
-    setTheme(nextTheme)
-    document.documentElement.classList.toggle('theme-light', nextTheme === 'light')
-  }, [])
+    document.documentElement.classList.toggle('theme-light', theme === 'light')
+    localStorage.setItem('storyvote_theme', theme)
+  }, [theme])
 
   const toggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark'
     setTheme(nextTheme)
-    document.documentElement.classList.toggle('theme-light', nextTheme === 'light')
-    localStorage.setItem('storyvote_theme', nextTheme)
   }
 
   const resetAll = async () => {

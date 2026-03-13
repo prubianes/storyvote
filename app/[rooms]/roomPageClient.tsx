@@ -36,12 +36,17 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
   const [roundActive, setRoundActive] = useState(true)
   const [history, setHistory] = useState<HistoryRound[]>([])
   const { setRoom } = useContext(RoomContext)
-  const [displayName, setDisplayName] = useState('')
-  const lastInteractionRef = useRef<number>(Date.now())
+  const [displayName] = useState(() => {
+    if (typeof window === 'undefined') {
+      return ''
+    }
+    return sessionStorage.getItem('user') || localStorage.getItem('user') || ''
+  })
+  const lastInteractionRef = useRef<number>(0)
   const isPresenceActiveRef = useRef<boolean>(true)
 
   useEffect(() => {
-    setDisplayName(sessionStorage.getItem('user') || localStorage.getItem('user') || '')
+    lastInteractionRef.current = Date.now()
   }, [])
 
   const syncRoomSnapshot = (data: RoomState) => {
