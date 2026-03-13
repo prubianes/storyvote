@@ -51,7 +51,8 @@ const translations = {
 
     'history.title': 'Historial de rondas',
     'history.empty': 'Aun no hay rondas cerradas.',
-    'history.roundTitle': 'Ronda #{number} · {story}',
+    'history.roundLabel': 'Ronda {number}',
+    'history.roundTitle': 'Historia: {story}',
     'history.noStory': 'Sin historia',
     'history.votes': 'Votos: {count}',
     'history.votesWord': 'votos',
@@ -142,7 +143,8 @@ const translations = {
 
     'history.title': 'Round history',
     'history.empty': 'There are no closed rounds yet.',
-    'history.roundTitle': 'Round #{number} · {story}',
+    'history.roundLabel': 'Round {number}',
+    'history.roundTitle': 'Story: {story}',
     'history.noStory': 'No story',
     'history.votes': 'Votes: {count}',
     'history.votesWord': 'votes',

@@ -65,7 +65,7 @@ export default function RoundHistory({ rounds }: RoundHistoryProps) {
           return (
             <article key={round.id} className="history-item">
               <div className="history-col-main">
-                <strong>{`Round ${rounds.length - index}`}</strong>
+                <strong>{t('history.roundLabel', { number: rounds.length - index })}</strong>
                 <div className="micro-label" style={{ marginTop: '0.35rem' }}>
                   {t('history.votes', { count: round.total_votes ?? 0 })}
                 </div>
@@ -74,7 +74,6 @@ export default function RoundHistory({ rounds }: RoundHistoryProps) {
               <div className="history-col-story">
                 <h5 className="history-story" title={storyLabel}>
                   {t('history.roundTitle', {
-                    number: rounds.length - index,
                     story: storyLabel,
                   })}
                 </h5>
