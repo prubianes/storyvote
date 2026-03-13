@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useContext, useEffect, useState } from 'react'
 
@@ -87,6 +88,10 @@ export default function Header() {
         >
           {language === 'es' ? 'EN' : 'ES'}
         </button>
+
+        <Link href="/guide" className="ui-btn header-guide-btn" aria-label={t('header.guideAria')}>
+          {t('header.guide')}
+        </Link>
 
         <button
           type="button"

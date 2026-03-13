@@ -49,8 +49,16 @@ export default function Page() {
       const username = String(formData.get('user') ?? '').trim()
       const selectedRoom = String(formData.get('room') ?? '').trim()
       const adminPasscode = String(formData.get('adminPasscode') ?? '').trim()
+      const normalizedRoom = selectedRoom.toLowerCase()
 
       if (!username || !selectedRoom) {
+        return
+      }
+
+      if (normalizedRoom === 'guide') {
+        setUser('')
+        setRoom('')
+        setFormError(t('home.reservedRoomName'))
         return
       }
 
