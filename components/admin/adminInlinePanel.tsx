@@ -485,7 +485,11 @@ export default function AdminInlinePanel({
     <section className="story-box">
       <div className="mb-3 flex items-center justify-between gap-3">
         <p className="micro-label">{t('admin.panelTitle')}</p>
-        <span className={`status-chip ${roundStatus === 'open' ? 'is-open' : 'is-closed'}`}>
+        <span
+          className={`status-chip ${
+            roundStatus === 'open' ? 'is-open' : roundStatus === 'revealed' ? 'is-revealed' : 'is-closed'
+          }`}
+        >
           {roundStatusLabel}
         </span>
       </div>

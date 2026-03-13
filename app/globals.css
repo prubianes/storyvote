@@ -97,6 +97,11 @@ button {
   cursor: pointer;
 }
 
+:focus-visible {
+  outline: 3px solid var(--cyan);
+  outline-offset: 3px;
+}
+
 .app-header {
   display: flex;
   justify-content: space-between;
@@ -205,6 +210,7 @@ button {
 .ui-btn:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+  filter: saturate(0.7);
 }
 
 .ui-btn.is-red {
@@ -425,6 +431,11 @@ html.theme-light .theme-logo {
   color: #f5f2ff;
 }
 
+.status-chip.is-revealed {
+  background: var(--cyan);
+  color: #071316;
+}
+
 .status-note {
   border: 3px solid var(--line);
   padding: 0.85rem 1rem;
@@ -476,6 +487,7 @@ html.theme-light .theme-logo {
 
 .vote-card:disabled {
   opacity: 0.45;
+  filter: saturate(0.7);
 }
 
 .meter-list {
@@ -661,6 +673,19 @@ html.theme-light .theme-logo {
   color: var(--red);
   font-weight: 700;
   margin-top: 0.7rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 @keyframes slam {

@@ -20,7 +20,7 @@ This repository is the rebooted version of the original project, now based on Ne
 
 ## Tech Stack
 
-- Next.js 15 (App Router)
+- Next.js 16 (App Router)
 - React 19
 - TypeScript
 - Tailwind CSS 4
@@ -39,6 +39,7 @@ This repository is the rebooted version of the original project, now based on Ne
 - `/Users/pablo/Projects/storyvote/components` - UI and feature components
 - `/Users/pablo/Projects/storyvote/system` - Supabase and session helpers
 - `/Users/pablo/Projects/storyvote/supabase/migrations` - SQL migrations
+- `/Users/pablo/Projects/storyvote/docs` - release and operational documentation
 
 ## Environment Variables
 
@@ -76,6 +77,7 @@ pnpm install
 - `/Users/pablo/Projects/storyvote/supabase/migrations/008_room_state_voted_users.sql`
 - `/Users/pablo/Projects/storyvote/supabase/migrations/009_deprecate_rooms_users.sql`
 - `/Users/pablo/Projects/storyvote/supabase/migrations/010_remove_legacy_rooms_votes.sql`
+- `/Users/pablo/Projects/storyvote/supabase/migrations/011_round_reveal_workflow.sql`
 
 4. Start development server:
 ```bash
@@ -95,11 +97,13 @@ pnpm exec playwright install --with-deps chromium
 
 - `pnpm dev` - start dev server
 - `pnpm build` - production build
+- `pnpm build:ci` - production build (webpack mode for CI stability)
 - `pnpm start` - run production build
 - `pnpm lint` - lint project
 - `pnpm typecheck` - generate route types + TypeScript checks
 - `pnpm test:e2e` - run Playwright smoke tests
 - `pnpm test:e2e:headed` - run Playwright smoke tests in headed mode
+- `pnpm verify` - lint + typecheck + build + e2e (release gate)
 
 ## Presence / Heartbeat Rules
 
@@ -120,12 +124,7 @@ pnpm exec playwright install --with-deps chromium
   - `/api/admin/reset`
   - `/api/presence`
 
-## Known Next Improvements
+## Release Process
 
-- Tighten RLS further for `rounds`, `votes`, and `participants`.
-- Add CI and E2E smoke tests.
-- Add export/reporting for round history.
-
-## Versioning Note
-
-Given the migration and feature expansion, this reboot is a strong candidate for `v0.2.0`.
+- CI runs the `verify` quality gate on pushes and pull requests.
+- Use `/Users/pablo/Projects/storyvote/docs/release-checklist.md` before tagging a release.

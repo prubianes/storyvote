@@ -47,6 +47,8 @@ const translations = {
 
     'aside.votesCast': 'Votos emitidos',
     'aside.connectedUsers': 'Usuarios conectados',
+    'aside.ready': 'LISTO',
+    'aside.wait': 'ESPERA',
 
     'keypad.openRoundMessage': 'Votacion abierta. Selecciona tu carta.',
     'keypad.revealedRoundMessage': 'Votacion revelada. Reabre la ronda para seguir votando.',
@@ -154,6 +156,8 @@ const translations = {
 
     'aside.votesCast': 'Votes cast',
     'aside.connectedUsers': 'Connected users',
+    'aside.ready': 'READY',
+    'aside.wait': 'WAIT',
 
     'keypad.openRoundMessage': 'Voting is open. Pick your card.',
     'keypad.revealedRoundMessage': 'Votes are revealed. Re-open the round to continue voting.',
