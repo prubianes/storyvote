@@ -509,6 +509,9 @@ html.theme-light .theme-logo {
   height: 100%;
   width: var(--w);
   background: linear-gradient(90deg, var(--red), var(--cyan), var(--blue));
+  transition: width 1000ms cubic-bezier(0.2, 0.85, 0.22, 1);
+  transition-delay: var(--d, 0ms);
+  will-change: width;
 }
 
 .sidebar-panel {
@@ -563,6 +566,18 @@ html.theme-light .theme-logo {
   gap: 0.9rem;
   margin-top: 1rem;
 }
+
+.history-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.history-head h4 {
+  margin: 0;
+}
+
 
 .history-item {
   display: grid;

@@ -48,7 +48,7 @@ function escapeHtml(value: string): string {
 
 interface AdminInlinePanelProps {
   roomSlug: string
-  roundActive: boolean
+  roundStatus: 'open' | 'revealed' | 'closed'
   currentStory: string
   historyRounds: HistoryRound[]
   onRoomUpdated: () => Promise<void> | void
@@ -56,7 +56,7 @@ interface AdminInlinePanelProps {
 
 export default function AdminInlinePanel({
   roomSlug,
-  roundActive,
+  roundStatus,
   currentStory,
   historyRounds,
   onRoomUpdated,
@@ -95,8 +95,13 @@ export default function AdminInlinePanel({
   }, [roomSlug])
 
   const roundStatusLabel = useMemo(
-    () => (roundActive ? t('admin.roundOpen') : t('admin.roundClosed')),
-    [roundActive, t]
+    () =>
+      roundStatus === 'open'
+        ? t('admin.roundOpen')
+        : roundStatus === 'revealed'
+          ? t('admin.roundRevealed')
+          : t('admin.roundClosed'),
+    [roundStatus, t]
   )
 
   const handleAuth = async (e: SyntheticEvent<HTMLFormElement>) => {
@@ -134,7 +139,7 @@ export default function AdminInlinePanel({
   const handleStoryForm = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    if (!roundActive) {
+    if (roundStatus !== 'open') {
       setAuthError(t('admin.storyOnlyWhenOpen'))
       return
     }
@@ -194,7 +199,7 @@ export default function AdminInlinePanel({
   }
 
   const handleToggleRound = async () => {
-    if (!roundActive && !storyDraft.trim()) {
+    if (roundStatus === 'closed' && !storyDraft.trim()) {
       setAuthError(t('admin.storyRequiredToOpen'))
       return
     }
@@ -202,10 +207,10 @@ export default function AdminInlinePanel({
     setIsSubmitting(true)
     setAuthError('')
     try {
-      const endpoint = roundActive ? '/api/admin/round/end' : '/api/admin/round/start'
-      const body = roundActive
-        ? { room: roomSlug }
-        : { room: roomSlug, story: storyDraft.trim() || null }
+      const endpoint = roundStatus === 'closed' ? '/api/admin/round/start' : '/api/admin/round/end'
+      const body = roundStatus === 'closed'
+        ? { room: roomSlug, story: storyDraft.trim() || null }
+        : { room: roomSlug }
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -217,9 +222,9 @@ export default function AdminInlinePanel({
         setIsAuthorized(false)
         setAuthError(t('admin.sessionExpired'))
       } else if (!response.ok) {
-        setAuthError(roundActive ? t('admin.closeRoundFailed') : t('admin.openRoundFailed'))
+        setAuthError(roundStatus !== 'closed' ? t('admin.closeRoundFailed') : t('admin.openRoundFailed'))
       } else {
-        if (roundActive) {
+        if (roundStatus !== 'closed') {
           setStoryDraft('')
         }
         await onRoomUpdated()
@@ -228,6 +233,66 @@ export default function AdminInlinePanel({
       setIsSubmitting(false)
     }
   }
+
+  const handleRevealRound = async () => {
+    if (roundStatus !== 'open') {
+      return
+    }
+    setIsSubmitting(true)
+    setAuthError('')
+    try {
+      const response = await fetch('/api/admin/round/reveal', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ room: roomSlug }),
+      })
+
+      if (response.status === 401) {
+        setIsAuthorized(false)
+        setAuthError(t('admin.sessionExpired'))
+      } else if (!response.ok) {
+        setAuthError(t('admin.revealRoundFailed'))
+      } else {
+        await onRoomUpdated()
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleReopenRound = async () => {
+    if (roundStatus !== 'revealed') {
+      return
+    }
+    setIsSubmitting(true)
+    setAuthError('')
+    try {
+      const response = await fetch('/api/admin/round/reopen', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ room: roomSlug }),
+      })
+
+      if (response.status === 401) {
+        setIsAuthorized(false)
+        setAuthError(t('admin.sessionExpired'))
+      } else if (!response.ok) {
+        setAuthError(t('admin.reopenRoundFailed'))
+      } else {
+        await onRoomUpdated()
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const roundControlLabel =
+    roundStatus === 'closed' ? t('admin.openRound') : t('admin.closeRound')
+
+  const roundControlTone = roundStatus === 'closed' ? 'is-mint' : 'is-blue'
+
+  const canRevealRound = roundStatus === 'open'
+  const canReopenRound = roundStatus === 'revealed'
 
   const handleExportPdf = () => {
     if (!historyRounds.length) {
@@ -420,7 +485,7 @@ export default function AdminInlinePanel({
     <section className="story-box">
       <div className="mb-3 flex items-center justify-between gap-3">
         <p className="micro-label">{t('admin.panelTitle')}</p>
-        <span className={`status-chip ${roundActive ? 'is-open' : 'is-closed'}`}>
+        <span className={`status-chip ${roundStatus === 'open' ? 'is-open' : 'is-closed'}`}>
           {roundStatusLabel}
         </span>
       </div>
@@ -444,15 +509,33 @@ export default function AdminInlinePanel({
           type="button"
           onClick={handleToggleRound}
           disabled={isSubmitting}
-          className={`ui-btn ${roundActive ? 'is-blue' : 'is-mint'}`}
+          className={`ui-btn ${roundControlTone}`}
         >
-          {roundActive ? t('admin.closeRound') : t('admin.openRound')}
+          {roundControlLabel}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleRevealRound}
+          disabled={isSubmitting || !canRevealRound}
+          className="ui-btn is-blue"
+        >
+          {t('admin.revealRound')}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleReopenRound}
+          disabled={isSubmitting || !canReopenRound}
+          className="ui-btn is-cyan"
+        >
+          {t('admin.reopenRound')}
         </button>
 
         <button
           type="submit"
           form="inline-story-form"
-          disabled={isSubmitting || !roundActive}
+          disabled={isSubmitting || roundStatus !== 'open'}
           className="ui-btn is-cyan"
         >
           {isSubmitting ? t('admin.saving') : t('admin.updateStory')}
@@ -461,7 +544,7 @@ export default function AdminInlinePanel({
         <button
           type="button"
           onClick={handleReset}
-          disabled={isSubmitting || !roundActive}
+          disabled={isSubmitting || roundStatus !== 'open'}
           className="ui-btn is-red"
         >
           {t('admin.resetVotes')}

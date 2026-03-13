@@ -1,5 +1,5 @@
 import type { CSSProperties, Dispatch, SetStateAction } from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { castVote } from '@/system/supabase'
 import { useI18n } from '@/components/LanguageContext/languageContextProvider'
 
@@ -11,16 +11,27 @@ interface KeypadProps {
   votes: number[]
   room: string
   roundActive: boolean
+  roundStatus: 'open' | 'revealed' | 'closed'
   voterKey: string
   onVotesChange?: Dispatch<SetStateAction<number[]>>
 }
 
-export default function Keypad({ votes, room, roundActive, voterKey, onVotesChange }: KeypadProps) {
+export default function Keypad({
+  votes,
+  room,
+  roundActive,
+  roundStatus,
+  voterKey,
+  onVotesChange,
+}: KeypadProps) {
   const { t } = useI18n()
   const availableVotes = useMemo(() => values, [])
   const [selectedVote, setSelectedVote] = useState<number | '∞' | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [voteError, setVoteError] = useState('')
+  const [meterVotes, setMeterVotes] = useState<number[]>(votes)
+  const [isRevealAnimating, setIsRevealAnimating] = useState(false)
+  const previousRoundStatusRef = useRef<'open' | 'revealed' | 'closed'>(roundStatus)
 
   useEffect(() => {
     const totalVotes = votes.reduce((partial, value) => partial + value, 0)
@@ -29,9 +40,43 @@ export default function Keypad({ votes, room, roundActive, voterKey, onVotesChan
     }
   }, [votes])
 
-  const maxVotes = votes.reduce((partial, value) => partial + value, 0) || 1
-  const meterStyle = (value: number) =>
-    ({ '--w': maxVotes > 0 ? `${Math.max(0, (value / maxVotes) * 100)}%` : '0%' }) as CSSProperties
+  useEffect(() => {
+    let frameId = 0
+    let timerId: number | undefined
+
+    if (roundStatus === 'open') {
+      setMeterVotes(new Array(availableVotes.length).fill(0))
+      setIsRevealAnimating(false)
+    } else if (roundStatus === 'revealed' && previousRoundStatusRef.current === 'open') {
+      setMeterVotes(new Array(availableVotes.length).fill(0))
+      setIsRevealAnimating(true)
+      frameId = window.requestAnimationFrame(() => {
+        setMeterVotes(votes)
+      })
+      timerId = window.setTimeout(() => setIsRevealAnimating(false), 1900)
+    } else {
+      setMeterVotes(votes)
+      setIsRevealAnimating(false)
+    }
+
+    previousRoundStatusRef.current = roundStatus
+
+    return () => {
+      if (frameId) {
+        window.cancelAnimationFrame(frameId)
+      }
+      if (timerId) {
+        window.clearTimeout(timerId)
+      }
+    }
+  }, [availableVotes.length, roundStatus, votes])
+
+  const maxVotes = meterVotes.reduce((partial, value) => partial + value, 0) || 1
+  const meterStyle = (value: number, index: number) =>
+    ({
+      '--w': maxVotes > 0 ? `${Math.max(0, (value / maxVotes) * 100)}%` : '0%',
+      '--d': isRevealAnimating ? `${index * 120}ms` : '0ms',
+    }) as CSSProperties
   const voteStyle = (index: number) =>
     ({ '--vote-hover': voteColors[index], '--vote-hover-ink': voteTextColors[index] }) as CSSProperties
 
@@ -53,7 +98,8 @@ export default function Keypad({ votes, room, roundActive, voterKey, onVotesChan
       setSelectedVote(result.selectedVoteIndex === null ? null : availableVotes[result.selectedVoteIndex])
     } catch (error) {
       const message = error instanceof Error ? error.message : ''
-      setVoteError(message.includes('No active round') ? t('keypad.noActiveRound') : t('keypad.voteError'))
+      const isNoRoundMessage = message.includes('No active round') || message.includes('No open round')
+      setVoteError(isNoRoundMessage ? t('keypad.noActiveRound') : t('keypad.voteError'))
     } finally {
       setIsSubmitting(false)
     }
@@ -61,15 +107,13 @@ export default function Keypad({ votes, room, roundActive, voterKey, onVotesChan
 
   return (
     <>
-      {roundActive ? (
-        <p className="status-note is-open">
-          {t('keypad.openRoundMessage')}
-        </p>
-      ) : (
-        <p className="status-note is-closed">
-          {t('keypad.closedRoundMessage')}
-        </p>
-      )}
+      {roundStatus === 'open' ? <p className="status-note is-open">{t('keypad.openRoundMessage')}</p> : null}
+      {roundStatus === 'revealed' ? (
+        <p className="status-note is-closed">{t('keypad.revealedRoundMessage')}</p>
+      ) : null}
+      {roundStatus === 'closed' ? (
+        <p className="status-note is-closed">{t('keypad.closedRoundMessage')}</p>
+      ) : null}
       <section className="vote-deck">
         {availableVotes.map((value) => {
           const isSelected = selectedVote === value
@@ -95,10 +139,10 @@ export default function Keypad({ votes, room, roundActive, voterKey, onVotesChan
           <div key={`key-${value}`} className="meter-row">
             <p className="meter-label">
               <span>{t('history.voteLabel', { value })}</span>
-              <span>{votes[index] ?? 0}</span>
+              <span>{roundStatus === 'open' ? '•' : (meterVotes[index] ?? 0)}</span>
             </p>
             <div className="meter-track">
-              <span className="meter-fill" style={meterStyle(votes[index] ?? 0)} />
+              <span className="meter-fill" style={meterStyle(meterVotes[index] ?? 0, index)} />
             </div>
           </div>
         ))}
