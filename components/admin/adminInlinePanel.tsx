@@ -441,8 +441,8 @@ export default function AdminInlinePanel({
   if (!isAuthorized) {
     if (!showAuthForm) {
       return (
-        <div className="flex justify-end">
-          <button type="button" onClick={() => setShowAuthForm(true)} className="ui-btn is-red">
+        <div>
+          <button type="button" onClick={() => setShowAuthForm(true)} className="ui-btn is-accent" style={{ width: '100%', justifyContent: 'center', padding: '11px' }}>
             {t('admin.modeButton')}
           </button>
         </div>
@@ -450,41 +450,43 @@ export default function AdminInlinePanel({
     }
 
     return (
-      <section className="story-box">
-        <p className="micro-label">{t('admin.modeTitle')}</p>
-        <p style={{ color: 'var(--muted)', margin: '0.5rem 0 0' }}>{t('admin.modeDescription')}</p>
-        <form onSubmit={handleAuth} className="action-row" style={{ marginTop: '1rem' }}>
+      <div>
+        <p className="micro-label" style={{ marginBottom: '8px' }}>{t('admin.modeTitle')}</p>
+        <p style={{ color: 'var(--muted)', margin: '0 0 14px', fontSize: '13px', lineHeight: 1.5 }}>{t('admin.modeDescription')}</p>
+        <form key="auth-form" onSubmit={handleAuth} style={{ display: 'grid', gap: '8px' }}>
           <input
             type="password"
             id="passcode-inline"
             name="passcode"
             placeholder="Passcode"
             className="field-input"
-            style={{ flex: '1 1 12rem' }}
           />
-          <button type="submit" disabled={isSubmitting} className="ui-btn is-cyan">
-            {isSubmitting ? t('admin.entering') : t('admin.enter')}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setShowAuthForm(false)
-              setAuthError('')
-            }}
-            className="ui-btn"
-          >
-            {t('admin.cancel')}
-          </button>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <button type="submit" disabled={isSubmitting} className="ui-btn is-accent" style={{ justifyContent: 'center', padding: '11px' }}>
+              {isSubmitting ? t('admin.entering') : t('admin.enter')}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowAuthForm(false)
+                setAuthError('')
+              }}
+              className="ui-btn"
+              style={{ justifyContent: 'center', padding: '11px' }}
+            >
+              {t('admin.cancel')}
+            </button>
+          </div>
         </form>
         {authError ? <p className="error-text">{authError}</p> : null}
-      </section>
+      </div>
     )
   }
 
   return (
-    <section className="story-box">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <p className="micro-label">{t('admin.panelTitle')}</p>
+    <div>
+      <div className="facilitator-header">
+        <span className="facilitator-title">{t('admin.panelTitle')}</span>
         <span
           className={`status-chip ${
             roundStatus === 'open' ? 'is-open' : roundStatus === 'revealed' ? 'is-revealed' : 'is-closed'
@@ -494,7 +496,10 @@ export default function AdminInlinePanel({
         </span>
       </div>
 
-      <form id="inline-story-form" onSubmit={handleStoryForm} className="space-y-3">
+      <label className="micro-label" style={{ display: 'block', marginBottom: '7px' }}>
+        {t('admin.storyPlaceholder')}
+      </label>
+      <form key="story-form" id="inline-story-form" onSubmit={handleStoryForm}>
         <input
           type="text"
           id="inline-story"
@@ -508,12 +513,13 @@ export default function AdminInlinePanel({
 
       {authError ? <p className="error-text">{authError}</p> : null}
 
-      <div className="action-row">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '14px' }}>
         <button
           type="button"
           onClick={handleToggleRound}
           disabled={isSubmitting}
           className={`ui-btn ${roundControlTone}`}
+          style={{ justifyContent: 'center', padding: '11px' }}
         >
           {roundControlLabel}
         </button>
@@ -523,15 +529,19 @@ export default function AdminInlinePanel({
           onClick={handleRevealRound}
           disabled={isSubmitting || !canRevealRound}
           className="ui-btn is-blue"
+          style={{ justifyContent: 'center', padding: '11px' }}
         >
           {t('admin.revealRound')}
         </button>
+      </div>
 
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '8px' }}>
         <button
           type="button"
           onClick={handleReopenRound}
           disabled={isSubmitting || !canReopenRound}
           className="ui-btn is-cyan"
+          style={{ justifyContent: 'center', padding: '11px' }}
         >
           {t('admin.reopenRound')}
         </button>
@@ -540,29 +550,34 @@ export default function AdminInlinePanel({
           type="submit"
           form="inline-story-form"
           disabled={isSubmitting || roundStatus !== 'open'}
-          className="ui-btn is-cyan"
+          className="ui-btn"
+          style={{ justifyContent: 'center', padding: '11px' }}
         >
           {isSubmitting ? t('admin.saving') : t('admin.updateStory')}
         </button>
-
-        <button
-          type="button"
-          onClick={handleReset}
-          disabled={isSubmitting || roundStatus !== 'open'}
-          className="ui-btn is-red"
-        >
-          {t('admin.resetVotes')}
-        </button>
-
-        <button
-          type="button"
-          onClick={handleExportPdf}
-          disabled={isExporting || !historyRounds.length}
-          className="ui-btn is-blue"
-        >
-          {isExporting ? t('admin.exporting') : t('admin.exportHistoryPdf')}
-        </button>
       </div>
-    </section>
+
+      <button
+        type="button"
+        onClick={handleReset}
+        disabled={isSubmitting || roundStatus !== 'open'}
+        className="ui-btn"
+        style={{ width: '100%', justifyContent: 'center', padding: '11px', marginTop: '8px' }}
+      >
+        {t('admin.resetVotes')}
+      </button>
+
+      <div style={{ height: '1px', background: 'var(--line)', margin: '16px 0' }} />
+
+      <button
+        type="button"
+        onClick={handleExportPdf}
+        disabled={isExporting || !historyRounds.length}
+        className="ui-btn"
+        style={{ width: '100%', justifyContent: 'center', padding: '9px 12px', fontSize: '12px' }}
+      >
+        {isExporting ? t('admin.exporting') : t('admin.exportHistoryPdf')}
+      </button>
+    </div>
   )
 }

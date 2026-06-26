@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     .from('rounds')
     .select('id')
     .eq('room_slug', room)
-    .eq('status', 'active')
+    .eq('status', 'open')
     .maybeSingle()
 
   if (readRoundError) {
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const { error } = await db.from('rounds').insert({
       room_slug: room,
       story,
-      status: 'active',
+      status: 'open',
     })
     roundError = error
   }

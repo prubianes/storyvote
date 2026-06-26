@@ -17,7 +17,7 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="es">
-      <body className="min-h-screen bg-slate-950 text-slate-100 antialiased">
+      <body>
         <LanguageContextProvider>
           <UserContextProvider>
             <Header />

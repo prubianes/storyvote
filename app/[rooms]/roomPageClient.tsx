@@ -264,43 +264,48 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
 
   return (
     <main className="page-shell">
+      <p className="micro-label" style={{ marginBottom: '14px' }}>Voting room</p>
+
+      {syncState === 'error' ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+          <p className="error-text" style={{ margin: 0 }}>
+            {t('room.syncError')}
+          </p>
+          <button
+            type="button"
+            className="ui-btn"
+            onClick={() => {
+              void attemptSync(roomSlug, 'reconnect')
+            }}
+          >
+            {t('room.retrySync')}
+          </button>
+        </div>
+      ) : null}
+
       <div className="page-grid">
-        <section className="ui-panel stage-panel">
-          {syncState === 'error' ? (
-            <div style={{ marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.7rem', flexWrap: 'wrap' }}>
-              <p className="error-text" style={{ margin: 0 }}>
-                {t('room.syncError')}
-              </p>
-              <button
-                type="button"
-                className="ui-btn"
-                onClick={() => {
-                  void attemptSync(roomSlug, 'reconnect')
-                }}
-              >
-                {t('room.retrySync')}
-              </button>
-            </div>
-          ) : null}
-
+        <section className="stage-panel">
           <div className="story-box">
-            <p className="micro-label">{t('room.currentStory')}</p>
-            <h3 className="story-heading">
+            <div className="story-header-row">
+              <span className="micro-label">{t('room.currentStory')}</span>
+              <span
+                className={`status-chip ${
+                  roundStatus === 'open' ? 'is-open' : roundStatus === 'revealed' ? 'is-revealed' : 'is-closed'
+                }`}
+              >
+                {roundStatus === 'open'
+                  ? t('admin.roundOpen')
+                  : roundStatus === 'revealed'
+                    ? t('admin.roundRevealed')
+                    : t('admin.roundClosed')}
+              </span>
+            </div>
+            <h2 className="story-heading">
               {story || t('room.undefinedStory')}
-            </h3>
+            </h2>
           </div>
 
-          <div style={{ marginTop: '1rem' }}>
-            <AdminInlinePanel
-              roomSlug={roomSlug}
-              roundStatus={roundStatus}
-              currentStory={story}
-              historyRounds={history}
-              onRoomUpdated={() => syncRoomAndHistory(roomSlug)}
-            />
-          </div>
-
-          <div style={{ marginTop: '1rem' }}>
+          <div style={{ marginTop: '22px' }}>
             <Keypad
               votes={votes}
               room={roomSlug}
@@ -312,12 +317,24 @@ export default function RoomPageClient({ roomSlug }: RoomPageClientProps) {
           </div>
         </section>
 
-        <aside className="ui-panel sidebar-panel">
-          <Aside users={users} votedUsers={votedUsers} votes={votes} />
-        </aside>
+        <div className="sidebar-column">
+          <aside className="sidebar-panel">
+            <Aside users={users} votedUsers={votedUsers} votes={votes} />
+          </aside>
+          <div className="facilitator-panel">
+            <AdminInlinePanel
+              roomSlug={roomSlug}
+              roundStatus={roundStatus}
+              currentStory={story}
+              historyRounds={history}
+              onRoomUpdated={() => syncRoomAndHistory(roomSlug)}
+            />
+          </div>
+        </div>
       </div>
 
-      <div>
+      <div className="history-section">
+        <p className="micro-label" style={{ marginBottom: '14px' }}>{t('history.title')}</p>
         <RoundHistory
           rounds={history}
           isLoading={isInitialLoading}

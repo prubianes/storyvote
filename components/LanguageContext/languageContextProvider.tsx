@@ -315,13 +315,14 @@ interface I18nProviderProps {
 }
 
 export default function LanguageContextProvider({ children }: I18nProviderProps) {
-  const [language, setLanguage] = useState<Language>(() => {
-    if (typeof window === 'undefined') {
-      return 'es'
-    }
+  const [language, setLanguage] = useState<Language>('es')
+
+  useEffect(() => {
     const savedLanguage = localStorage.getItem('storyvote_language')
-    return savedLanguage === 'en' || savedLanguage === 'es' ? savedLanguage : 'es'
-  })
+    if (savedLanguage === 'en' || savedLanguage === 'es') {
+      setLanguage(savedLanguage)
+    }
+  }, [])
 
   useEffect(() => {
     localStorage.setItem('storyvote_language', language)

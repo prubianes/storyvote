@@ -89,80 +89,82 @@ export default function Page() {
 
   return (
     <main className="page-shell">
-      <section className="landing-grid">
-        <article className="landing-main">
-          <section className="ui-panel title-panel">
-            <p className="micro-label">{t('home.badge')}</p>
-            <h2 className="hero-title">{t('home.welcome')}</h2>
-          </section>
+      <div className="ui-panel landing-panel">
+        <div className="landing-form-col">
+          <span className="landing-badge">{t('home.badge')}</span>
+          <h2 className="landing-title">{t('home.welcome')}</h2>
+          <p className="landing-desc">{t('home.description')}</p>
 
-          <section className="ui-panel form-panel">
-            <p className="hero-copy">{t('home.description')}</p>
-            <form onSubmit={handleForm} className="hero-form">
-              <label className="field">
-                <span className="field-label">{t('home.name')}</span>
-                <input
-                  type="text"
-                  id="user"
-                  name="user"
-                  placeholder={t('home.namePlaceholder')}
-                  required
-                  className="field-input"
-                />
-              </label>
+          <form onSubmit={handleForm} className="hero-form">
+            <label className="field">
+              <span className="field-label">{t('home.name')}</span>
+              <input
+                type="text"
+                id="user"
+                name="user"
+                placeholder={t('home.namePlaceholder')}
+                required
+                className="field-input"
+              />
+            </label>
 
-              <label className="field">
-                <span className="field-label">{t('home.room')}</span>
-                <input
-                  type="text"
-                  id="room"
-                  name="room"
-                  placeholder={t('home.roomPlaceholder')}
-                  required
-                  className="field-input"
-                />
-              </label>
+            <label className="field">
+              <span className="field-label">{t('home.room')}</span>
+              <input
+                type="text"
+                id="room"
+                name="room"
+                placeholder={t('home.roomPlaceholder')}
+                required
+                className="field-input"
+              />
+            </label>
 
-              <label className="field">
-                <span className="field-label">{t('home.adminPasscodeOptional')}</span>
-                <input
-                  type="password"
-                  id="adminPasscode"
-                  name="adminPasscode"
-                  placeholder={t('home.adminPasscodePlaceholder')}
-                  className="field-input"
-                />
-              </label>
+            <label className="field">
+              <span className="field-label">{t('home.adminPasscodeOptional')}</span>
+              <input
+                type="password"
+                id="adminPasscode"
+                name="adminPasscode"
+                placeholder={t('home.adminPasscodePlaceholder')}
+                className="field-input"
+              />
+            </label>
 
-              <button type="submit" disabled={isSubmitting} className="ui-btn is-cyan">
-                {isSubmitting ? t('home.entering') : t('home.enter')}
-              </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="ui-btn is-accent"
+              style={{ padding: '13px', fontSize: '14px', fontWeight: 700, marginTop: '4px' }}
+            >
+              {isSubmitting ? t('home.entering') : t('home.enter')}
+            </button>
 
-              {formError ? <p className="error-text">{formError}</p> : null}
-            </form>
-          </section>
-        </article>
+            {formError ? <p className="error-text">{formError}</p> : null}
+          </form>
+        </div>
 
-        <aside className="landing-side">
-          <section className="ui-panel note-panel">
-            <p className="micro-label">{t('room.currentStory')}</p>
-            <h3 style={{ marginTop: '0.8rem', fontSize: 'clamp(2.4rem, 4.4vw, 4.8rem)' }}>
+        <div className="landing-info-col">
+          <span className="landing-metric-label">{t('aside.votesCast')}</span>
+          <div className="landing-metric-number">08</div>
+          <p className="landing-metric-desc">{t('home.metricBody')}</p>
+
+          <div className="landing-features">
+            <div className="landing-feature-item">
+              <span className="landing-feature-dot" />
               {t('home.featureTitle')}
-            </h3>
-            <p className="hero-copy" style={{ marginTop: '0.8rem' }}>
+            </div>
+            <div className="landing-feature-item">
+              <span className="landing-feature-dot" />
               {t('home.featureBody')}
-            </p>
-          </section>
-
-          <section className="ui-panel metric-panel">
-            <p className="micro-label" style={{ color: 'rgba(255, 246, 239, 0.78)' }}>
-              {t('aside.votesCast')}
-            </p>
-            <span className="metric-value">08</span>
-            <p style={{ margin: 0, lineHeight: 1.55 }}>{t('home.metricBody')}</p>
-          </section>
-        </aside>
-      </section>
+            </div>
+            <div className="landing-feature-item">
+              <span className="landing-feature-dot" />
+              {t('home.metricBody')}
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   )
 }
