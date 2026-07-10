@@ -146,6 +146,11 @@ const translations = {
     'admin.pdfColStart': 'Inicio',
     'admin.pdfColClose': 'Cierre',
     'admin.pdfColDistribution': 'Distribucion',
+
+    'notFound.badge': '404',
+    'notFound.title': 'Página no encontrada',
+    'notFound.description': 'La sala o ruta que intentas abrir no existe o ya no está disponible.',
+    'notFound.cta': 'Volver al inicio',
   },
   en: {
     'header.greeting': 'Hi {user}',
@@ -281,6 +286,11 @@ const translations = {
     'admin.pdfColStart': 'Start',
     'admin.pdfColClose': 'Close',
     'admin.pdfColDistribution': 'Distribution',
+
+    'notFound.badge': '404',
+    'notFound.title': 'Page not found',
+    'notFound.description': 'The room or route you tried to open does not exist or is no longer available.',
+    'notFound.cta': 'Back to home',
   },
 } as const
 

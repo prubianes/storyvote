@@ -1027,6 +1027,29 @@ button {
   max-width: 52ch;
 }
 
+/* ── Not found page ───────────────────────────────── */
+
+.not-found-shell {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.not-found-panel {
+  max-width: 440px;
+  padding: 2.2rem;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(18px);
+  animation: slam 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
+}
+
+.not-found-desc {
+  margin: 14px auto 26px;
+  max-width: 36ch;
+}
+
 /* ── Animations ───────────────────────────────────── */
 
 @keyframes slam {
