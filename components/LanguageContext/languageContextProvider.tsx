@@ -146,6 +146,11 @@ const translations = {
     'admin.pdfColStart': 'Inicio',
     'admin.pdfColClose': 'Cierre',
     'admin.pdfColDistribution': 'Distribucion',
+
+    'notFound.badge': '404',
+    'notFound.title': 'Página no encontrada',
+    'notFound.description': 'La sala o ruta que intentas abrir no existe o ya no está disponible.',
+    'notFound.cta': 'Volver al inicio',
   },
   en: {
     'header.greeting': 'Hi {user}',
@@ -281,6 +286,11 @@ const translations = {
     'admin.pdfColStart': 'Start',
     'admin.pdfColClose': 'Close',
     'admin.pdfColDistribution': 'Distribution',
+
+    'notFound.badge': '404',
+    'notFound.title': 'Page not found',
+    'notFound.description': 'The room or route you tried to open does not exist or is no longer available.',
+    'notFound.cta': 'Back to home',
   },
 } as const
 
@@ -315,13 +325,16 @@ interface I18nProviderProps {
 }
 
 export default function LanguageContextProvider({ children }: I18nProviderProps) {
-  const [language, setLanguage] = useState<Language>(() => {
-    if (typeof window === 'undefined') {
-      return 'es'
-    }
+  const [language, setLanguage] = useState<Language>('es')
+
+  useEffect(() => {
     const savedLanguage = localStorage.getItem('storyvote_language')
-    return savedLanguage === 'en' || savedLanguage === 'es' ? savedLanguage : 'es'
-  })
+    if (savedLanguage === 'en' || savedLanguage === 'es') {
+      // One-time hydration from localStorage, unavailable during SSR/first render.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLanguage(savedLanguage)
+    }
+  }, [])
 
   useEffect(() => {
     localStorage.setItem('storyvote_language', language)

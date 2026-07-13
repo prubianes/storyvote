@@ -4,8 +4,6 @@ import { castVote } from '@/system/supabase'
 import { useI18n } from '@/components/LanguageContext/languageContextProvider'
 
 const values: Array<number | '∞'> = [1, 2, 3, 5, 8, 13, 20, '∞']
-const voteColors = ['#ff5a3c', '#ff8b5e', '#65d8e6', '#5c7cff', '#6ce0b3', '#9fe6ff', '#f4f0e8', '#8896a4']
-const voteTextColors = ['#fff6ef', '#111111', '#071316', '#f5f2ff', '#07130e', '#071316', '#111111', '#f4f0e8']
 
 interface KeypadProps {
   votes: number[]
@@ -77,8 +75,6 @@ export default function Keypad({
       '--w': maxVotes > 0 ? `${Math.max(0, (value / maxVotes) * 100)}%` : '0%',
       '--d': isRevealAnimating ? `${index * 120}ms` : '0ms',
     }) as CSSProperties
-  const voteStyle = (index: number) =>
-    ({ '--vote-hover': voteColors[index], '--vote-hover-ink': voteTextColors[index] }) as CSSProperties
 
   const handleVote = async (vote: number | '∞') => {
     if (!room || !voterKey || isSubmitting || !roundActive) {
@@ -107,17 +103,24 @@ export default function Keypad({
 
   return (
     <>
-      {roundStatus === 'open' ? <p className="status-note is-open">{t('keypad.openRoundMessage')}</p> : null}
+      {roundStatus === 'open' ? (
+        <p className="status-note is-open">{t('keypad.openRoundMessage')}</p>
+      ) : null}
       {roundStatus === 'revealed' ? (
         <p className="status-note is-closed">{t('keypad.revealedRoundMessage')}</p>
       ) : null}
       {roundStatus === 'closed' ? (
         <p className="status-note is-closed">{t('keypad.closedRoundMessage')}</p>
       ) : null}
-      <section className="vote-deck">
+
+      <div className="meter-section-label">
+        <span className="micro-label">{t('home.name') ? 'Your estimate' : ''}</span>
+        <span className="micro-label" style={{ letterSpacing: 0, textTransform: 'none', fontSize: '12px', fontWeight: 500 }}>Fibonacci</span>
+      </div>
+
+      <section className="vote-deck" style={{ marginTop: 0 }}>
         {availableVotes.map((value) => {
           const isSelected = selectedVote === value
-          const voteIndex = availableVotes.indexOf(value)
           return (
             <button
               key={value}
@@ -125,21 +128,30 @@ export default function Keypad({
               onClick={() => handleVote(value)}
               disabled={isSubmitting || !roundActive}
               className={`vote-card ${isSelected ? 'is-selected' : ''}`}
-              style={voteStyle(voteIndex)}
             >
               {value}
             </button>
           )
         })}
       </section>
+
       {voteError ? <p className="error-text">{voteError}</p> : null}
 
-      <section className="meter-list">
+      <div className="meter-section-label" style={{ marginTop: '24px' }}>
+        <span className="micro-label">Distribution</span>
+        <span className="micro-label" style={{ letterSpacing: 0, textTransform: 'none', fontSize: '12px', fontWeight: 500, color: 'var(--faint)' }}>
+          {roundStatus === 'open' ? t('keypad.hiddenUntilReveal') : ''}
+        </span>
+      </div>
+
+      <section className="meter-list" style={{ marginTop: 0 }}>
         {availableVotes.map((value, index) => (
           <div key={`key-${value}`} className="meter-row">
             <p className="meter-label">
               <span>{t('history.voteLabel', { value })}</span>
-              <span>{roundStatus === 'open' ? '•' : (meterVotes[index] ?? 0)}</span>
+              <span style={{ color: 'var(--ink)', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+                {roundStatus === 'open' ? '·' : (meterVotes[index] ?? 0)}
+              </span>
             </p>
             <div className="meter-track">
               <span className="meter-fill" style={meterStyle(meterVotes[index] ?? 0, index)} />

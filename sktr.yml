@@ -1,0 +1,42 @@
+project:
+  name: storyvote
+  default_base: main
+review:
+  default_scope: working_tree
+  fail_on: null
+  exclude:
+    - node_modules/
+    - .venv/
+    - venv/
+    - dist/
+    - build/
+    - target/
+    - coverage/
+    - "*.min.js"
+    - "*.generated.*"
+plugins:
+  analyzers:
+    - sktr-java
+    - sktr-javascript-typescript
+    - sktr-python
+  rules:
+    - sktr-rules-default
+  outputs:
+    - terminal
+    - markdown
+    - json
+    - mermaid
+rules:
+  enabled:
+    - new_dependency
+    - large_file
+    - large_function
+    - forbidden_dependency
+    - dependency_cycle
+    - high_fan_out
+    - public_api_change
+    - missing_tests
+ai:
+  enabled: true
+  provider: openai
+  model: gpt-5.6-terra

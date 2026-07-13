@@ -9,10 +9,10 @@ export default function GuidePage() {
     <main className="page-shell guide-shell">
       <section className="ui-panel guide-panel">
         <p className="micro-label">{t('header.guide')}</p>
-        <h2 className="hero-title" style={{ fontSize: 'clamp(2.2rem, 5vw, 4.6rem)', marginTop: '0.8rem' }}>
+        <h2 className="landing-title" style={{ fontSize: 'clamp(2.2rem, 5vw, 4.6rem)', marginTop: '0.8rem' }}>
           {t('guide.title')}
         </h2>
-        <p className="hero-copy" style={{ marginTop: '0.9rem' }}>
+        <p className="landing-desc" style={{ marginTop: '0.9rem', maxWidth: 'none' }}>
           {t('guide.subtitle')}
         </p>
       </section>
