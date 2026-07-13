@@ -8,6 +8,7 @@ import {
   upsertParticipantPresence,
 } from '@/system/supabase'
 import { useI18n } from '@/components/LanguageContext/languageContextProvider'
+import { useTheme } from '@/components/theme/useTheme'
 import { useRouter } from 'next/navigation'
 import { useContext, useEffect, useState, type SyntheticEvent } from 'react'
 
@@ -15,6 +16,7 @@ export default function Page() {
   const router = useRouter()
   const { t } = useI18n()
   const { setUser, setRoom } = useContext(RoomContext)
+  const theme = useTheme()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formError, setFormError] = useState('')
 
@@ -145,8 +147,11 @@ export default function Page() {
         </div>
 
         <div className="landing-info-col">
-          <span className="landing-metric-label">{t('aside.votesCast')}</span>
-          <div className="landing-metric-number">08</div>
+          <img
+            src={theme === 'dark' ? '/logo-dark.svg' : '/logo-light.svg'}
+            alt="StoryVote"
+            className="landing-logo"
+          />
           <p className="landing-metric-desc">{t('home.metricBody')}</p>
 
           <div className="landing-features">

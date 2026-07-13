@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useContext, useEffect, useState } from 'react'
 
 import { RoomContext } from '../RoomContext/roomContextProvider'
@@ -12,6 +12,8 @@ export default function Header() {
   const { user, setUser, room, setRoom } = useContext(RoomContext)
   const { language, toggleLanguage, t } = useI18n()
   const router = useRouter()
+  const pathname = usePathname()
+  const isHome = pathname === '/'
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
 
   useEffect(() => {
@@ -63,15 +65,17 @@ export default function Header() {
   return (
     <div className="app-header-sticky">
       <header className="app-header">
-        <div className="brand-stack">
-          <div className="brand-badge" aria-hidden="true">SV</div>
-          <div>
-            <h1 className="brand-name">StoryVote</h1>
-            <span className="brand-meta">
-              {room ? `${t('home.badge')} · ${room}` : t('home.badge')}
-            </span>
+        {isHome ? null : (
+          <div className="brand-stack">
+            <h1 className="brand-logo-heading">
+              <img
+                src={theme === 'dark' ? '/logo-dark.svg' : '/logo-light.svg'}
+                alt="StoryVote"
+                className="brand-logo"
+              />
+            </h1>
           </div>
-        </div>
+        )}
 
         <div className="header-controls">
           {user ? (

@@ -142,39 +142,16 @@ button {
   min-width: 0;
 }
 
-.brand-badge {
-  width: 42px;
-  height: 42px;
-  flex-shrink: 0;
-  border-radius: var(--radius-sm);
-  background: var(--accent-soft);
-  color: var(--accent);
-  display: grid;
-  place-items: center;
-  font-family: "Space Grotesk", sans-serif;
-  font-weight: 700;
-  font-size: 17px;
-  border: 1px solid var(--line);
-  letter-spacing: -0.02em;
-}
-
-.brand-name {
-  font-family: "Space Grotesk", sans-serif;
-  font-weight: 700;
-  font-size: clamp(1rem, 2vw, 1.25rem);
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-}
-
-.brand-meta {
+.brand-logo-heading {
   display: block;
-  font-size: 11px;
-  color: var(--faint);
-  font-weight: 500;
-  margin-top: 2px;
-  letter-spacing: 0;
-  text-transform: none;
-  font-family: "Hanken Grotesk", sans-serif;
+  margin: 0;
+  line-height: 0;
+}
+
+.brand-logo {
+  display: block;
+  height: 40px;
+  width: auto;
 }
 
 .header-controls {
@@ -182,6 +159,7 @@ button {
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
+  margin-left: auto;
 }
 
 .user-slab {
@@ -386,23 +364,11 @@ button {
   background: var(--panel);
 }
 
-.landing-metric-number {
-  font-family: "Space Grotesk", sans-serif;
-  font-weight: 700;
-  font-size: 60px;
-  line-height: 0.9;
-  letter-spacing: -0.03em;
-  color: var(--ink);
-  margin: 12px 0 6px;
-  font-variant-numeric: tabular-nums;
-}
-
-.landing-metric-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
+.landing-logo {
+  display: block;
+  height: 96px;
+  width: auto;
+  margin-bottom: 20px;
 }
 
 .landing-metric-desc {

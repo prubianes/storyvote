@@ -1,4 +1,10 @@
-# StoryVote
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="public/logo-light.svg">
+    <img alt="StoryVote" src="public/logo-light.svg" width="360">
+  </picture>
+</p>
 
 StoryVote is a realtime planning poker app for scrum teams.
 
