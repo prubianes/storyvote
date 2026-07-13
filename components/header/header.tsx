@@ -18,6 +18,8 @@ export default function Header() {
 
   useEffect(() => {
     if (localStorage.getItem('storyvote_theme') === 'light') {
+      // One-time hydration from localStorage, unavailable during SSR/first render.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme('light')
     }
   }, [])

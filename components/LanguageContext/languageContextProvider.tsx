@@ -330,6 +330,8 @@ export default function LanguageContextProvider({ children }: I18nProviderProps)
   useEffect(() => {
     const savedLanguage = localStorage.getItem('storyvote_language')
     if (savedLanguage === 'en' || savedLanguage === 'es') {
+      // One-time hydration from localStorage, unavailable during SSR/first render.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLanguage(savedLanguage)
     }
   }, [])
