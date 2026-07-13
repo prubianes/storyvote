@@ -6,6 +6,12 @@
   </picture>
 </p>
 
+<p align="center">
+  <a href="https://github.com/prubianes/storyvote/actions/workflows/ci.yml">
+    <img alt="CI" src="https://github.com/prubianes/storyvote/actions/workflows/ci.yml/badge.svg">
+  </a>
+</p>
+
 StoryVote is a realtime planning poker app for scrum teams.
 
 Version `v1.0.0` includes:
@@ -54,16 +60,20 @@ flowchart LR
 
 ## Project Structure
 
-- `/Users/pablo/Projects/storyvote/app` - routes/pages/API endpoints
-- `/Users/pablo/Projects/storyvote/components` - UI and feature components
-- `/Users/pablo/Projects/storyvote/system` - Supabase + admin session helpers
-- `/Users/pablo/Projects/storyvote/supabase/migrations` - DB migrations
-- `/Users/pablo/Projects/storyvote/e2e` - Playwright smoke tests
-- `/Users/pablo/Projects/storyvote/docs` - release and ops docs
+- `app` - routes/pages/API endpoints
+- `components` - UI and feature components
+- `system` - Supabase + admin session helpers
+- `supabase/migrations` - DB migrations
+- `e2e` - Playwright smoke tests
+- `docs` - release and ops docs
 
 ## Environment Variables
 
-Create `/Users/pablo/Projects/storyvote/.env.local`:
+Copy the example file and fill in your Supabase project's values:
+
+```bash
+cp .env.example .env.local
+```
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
@@ -82,7 +92,7 @@ Notes:
 Choose exactly one path:
 
 1. Fresh environment (recommended):
-- Apply `/Users/pablo/Projects/storyvote/supabase/migrations/000_baseline_v1.sql`
+- Apply `supabase/migrations/000_baseline_v1.sql`
 
 2. Existing environment upgrading from older versions:
 - Apply incremental migrations in order:
@@ -91,6 +101,8 @@ Choose exactly one path:
 Do not apply both baseline and incrementals on the same fresh database.
 
 ## Local Setup
+
+Prerequisites: Node.js 20+, pnpm, and a Supabase project.
 
 1. Install dependencies:
 
@@ -150,5 +162,5 @@ Admin/session and presence:
 
 ## Release
 
-- Use `/Users/pablo/Projects/storyvote/docs/release-checklist.md` before tagging
+- Use `docs/release-checklist.md` before tagging
 - Ensure migration `011_round_reveal_workflow.sql` is applied on upgraded environments
